@@ -1,0 +1,25 @@
+Package: SRSim
+Type: Package
+Title: Spontaneous Reporting Simulator (SRSim)
+Version: 0.1
+Date: 2018-01-18
+Author: Louis Dijkstra [aut, cre], Marco Garling [ctb]
+Maintainer: Louis Dijkstra <dijkstra@leibniz-bips.de>
+Description: A package for simulating spontaneous reporting 
+	data as used in the field of pharmacovigilance. 
+Depends: 
+	R (>= 3.2.3),
+	Rcpp,
+	RcppArmadillo,
+	RcppProgress,
+	dplyr,
+	tidyr,
+	corpcor,
+	mvtnorm
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+URL: https://github.com/bips-hb/srsim
+BugReports: https://github.com/bips-hb/srsim/issues
