@@ -14,7 +14,6 @@ Depends:
 	RcppProgress,
 	dplyr,
 	tidyr,
-	corpcor,
 	mvtnorm
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 License: GPL-3
