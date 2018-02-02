@@ -385,7 +385,7 @@ Rcpp::LogicalMatrix threshold (arma::mat raw) {
 //' 
 //' @param n_reports The number of reports generated
 //' @param means The mean of the multivariate normal distribution
-//' @param covmat The covariance matrix of the multivariate normal distribution
+//' @param L The Cholesky decomposition of the covariance matrix of the multivariate normal distribution
 //' @param valid_reports When \code{TRUE}, only valid reports are added 
 //' @param n_drugs The number of drugs 
 //' @param n_events The number of events
@@ -395,13 +395,10 @@ Rcpp::LogicalMatrix threshold (arma::mat raw) {
 //' @return A logical matrix. Each row is a report. The number of columns is equal to \code{n_drugs + n_events}
 //' @seealso \code{\link{validReport}}
 // [[Rcpp::export]] 
-Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, arma::mat covmat, bool valid_reports, int n_drugs, int n_events, bool verbose) {
-  
-  // Perform the Cholesky decomposition for the covariance matrix 
-  arma::mat L = arma::chol(covmat) ; 
+Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, arma::mat L, bool valid_reports, int n_drugs, int n_events, bool verbose) {
   
   if (!valid_reports) { // If we don't care whether the reports are 'valid'
-    arma::mat raw = mvrnormArma(n_reports, means, L, covmat.n_cols) ; 
+    arma::mat raw = mvrnormArma(n_reports, means, L, L.n_cols) ; 
     return(threshold(raw)) ; 
     
   } else {
@@ -420,7 +417,7 @@ Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, a
     while (n_reports_generated < n_reports) {
       
       // generate one report
-      report_raw = mvrnormArma(1, means, L, covmat.n_cols) ; 
+      report_raw = mvrnormArma(1, means, L, L.n_cols) ; 
       report = threshold(report_raw) ; 
       
       // check whether it is valid

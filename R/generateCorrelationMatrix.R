@@ -23,9 +23,9 @@
 #' @param verbose Prints the number of iterations (Default: \code{FALSE})
 #' 
 #' @return \item{corrmat}{The correlation matrix}
+#'         \item{covmat}{The covariance matrix}
 #'         \item{valid}{\code{TRUE} when \code{corrmat} is a correlation matrix, \code{FALSE} otherwise} 
 #'           
-#' 
 #' @seealso \code{\link{validCorrelation}}
 #' @export
 generateCorrelationMatrix <- function(prob_drugs,
@@ -38,6 +38,8 @@ generateCorrelationMatrix <- function(prob_drugs,
                                       rho,
                                       max_iter = 1000, 
                                       verbose = FALSE) {
+
+  margprob = c(prob_drugs, prob_events)
 
   # keep on generating correlation matrices until one is valid or 
   # the maximum number of iterations is reached
@@ -55,13 +57,17 @@ generateCorrelationMatrix <- function(prob_drugs,
                                         rho_events, 
                                         n_correlated_pairs, 
                                         rho) 
+
+    # determine the covariance matrix 
+    covmat <- corr2cov(mat, margprob)
     
     # We use the Cholesky decomposition to test for positive definiteness. 
     # Runs much faster for larger matrices than computing all eigenvalues
-    if (!is(chol(mat), "error")) {
+    if (!is(chol(covmat), "error")) {
       return(
         list(
           corrmat = mat, 
+          covmat = covmat, 
           valid = TRUE
         )
       )
@@ -72,6 +78,7 @@ generateCorrelationMatrix <- function(prob_drugs,
   return(
     list(
       corrmat = mat, 
+      covmat = covmat, 
       valid = FALSE
     )
   )

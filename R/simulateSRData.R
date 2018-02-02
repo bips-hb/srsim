@@ -195,10 +195,7 @@ simulateSRData <- function(n_reports = 100,
     cat("Succesfully generated a correlation matrix\nGenerating reports...\n")  
   }
   
-  # determine the covariance matrix 
-  covmat <- corr2cov(results$corrmat, margprob)
-  
-  samples <- generateReports(n_reports, qnorm(margprob), covmat, valid_reports, n_drugs, n_events, verbose)
+  samples <- generateReports(n_reports, qnorm(margprob), chol(results$covmat), valid_reports, n_drugs, n_events, verbose)
   
   # turn into something numeric
   samples <- as.numeric(samples)
@@ -213,7 +210,8 @@ simulateSRData <- function(n_reports = 100,
       sr = samples, 
       prob_drugs = prob_drugs,
       prob_events = prob_events, 
-      corrmat = results$corrmat
+      corrmat = results$corrmat,
+      covmat = results$covmat
     )
   )
 }

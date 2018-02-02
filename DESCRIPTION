@@ -14,7 +14,8 @@ Depends:
 	RcppProgress,
 	dplyr,
 	tidyr,
-	mvtnorm
+	mvtnorm,
+	corpcor
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 License: GPL-3
 Encoding: UTF-8
