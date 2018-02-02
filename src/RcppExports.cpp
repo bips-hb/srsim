@@ -128,19 +128,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // generateReports
-Rcpp::LogicalMatrix generateReports(int n_reports, Rcpp::NumericVector means, arma::mat covmat, bool valid_reports, int n_drugs, int n_events, bool verbose);
-RcppExport SEXP _SRSim_generateReports(SEXP n_reportsSEXP, SEXP meansSEXP, SEXP covmatSEXP, SEXP valid_reportsSEXP, SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP verboseSEXP) {
+Rcpp::LogicalMatrix generateReports(int n_reports, Rcpp::NumericVector means, arma::mat L, bool valid_reports, int n_drugs, int n_events, bool verbose);
+RcppExport SEXP _SRSim_generateReports(SEXP n_reportsSEXP, SEXP meansSEXP, SEXP LSEXP, SEXP valid_reportsSEXP, SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type n_reports(n_reportsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type means(meansSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type covmat(covmatSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type L(LSEXP);
     Rcpp::traits::input_parameter< bool >::type valid_reports(valid_reportsSEXP);
     Rcpp::traits::input_parameter< int >::type n_drugs(n_drugsSEXP);
     Rcpp::traits::input_parameter< int >::type n_events(n_eventsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(generateReports(n_reports, means, covmat, valid_reports, n_drugs, n_events, verbose));
+    rcpp_result_gen = Rcpp::wrap(generateReports(n_reports, means, L, valid_reports, n_drugs, n_events, verbose));
     return rcpp_result_gen;
 END_RCPP
 }

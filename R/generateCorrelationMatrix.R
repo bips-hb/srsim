@@ -63,7 +63,7 @@ generateCorrelationMatrix <- function(prob_drugs,
     
     # We use the Cholesky decomposition to test for positive definiteness. 
     # Runs much faster for larger matrices than computing all eigenvalues
-    if (!is(chol(covmat), "error")) {
+    if (corpcor::is.positive.definite(covmat, method = "chol")) {
       return(
         list(
           corrmat = mat, 

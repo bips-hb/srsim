@@ -187,7 +187,7 @@ threshold <- function(raw) {
 #' 
 #' @param n_reports The number of reports generated
 #' @param means The mean of the multivariate normal distribution
-#' @param covmat The covariance matrix of the multivariate normal distribution
+#' @param L The Cholesky decomposition of the covariance matrix of the multivariate normal distribution
 #' @param valid_reports When \code{TRUE}, only valid reports are added 
 #' @param n_drugs The number of drugs 
 #' @param n_events The number of events
@@ -196,8 +196,8 @@ threshold <- function(raw) {
 #' 
 #' @return A logical matrix. Each row is a report. The number of columns is equal to \code{n_drugs + n_events}
 #' @seealso \code{\link{validReport}}
-generateReports <- function(n_reports, means, covmat, valid_reports, n_drugs, n_events, verbose) {
-    .Call('_SRSim_generateReports', PACKAGE = 'SRSim', n_reports, means, covmat, valid_reports, n_drugs, n_events, verbose)
+generateReports <- function(n_reports, means, L, valid_reports, n_drugs, n_events, verbose) {
+    .Call('_SRSim_generateReports', PACKAGE = 'SRSim', n_reports, means, L, valid_reports, n_drugs, n_events, verbose)
 }
 
 #' Create 2 x 2 Tables 
