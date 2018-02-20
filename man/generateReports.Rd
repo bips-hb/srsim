@@ -4,15 +4,14 @@
 \alias{generateReports}
 \title{Generating Reports}
 \usage{
-generateReports(n_reports, means, covmat, valid_reports, n_drugs, n_events,
-  verbose)
+generateReports(n_reports, means, L, valid_reports, n_drugs, n_events, verbose)
 }
 \arguments{
 \item{n_reports}{The number of reports generated}
 
 \item{means}{The mean of the multivariate normal distribution}
 
-\item{covmat}{The covariance matrix of the multivariate normal distribution}
+\item{L}{The Cholesky decomposition of the covariance matrix of the multivariate normal distribution}
 
 \item{valid_reports}{When \code{TRUE}, only valid reports are added}
 

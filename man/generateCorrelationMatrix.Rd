@@ -31,6 +31,7 @@ generateCorrelationMatrix(prob_drugs, prob_events, n_correlated_drugs,
 }
 \value{
 \item{corrmat}{The correlation matrix}
+        \item{covmat}{The covariance matrix}
         \item{valid}{\code{TRUE} when \code{corrmat} is a correlation matrix, \code{FALSE} otherwise}
 }
 \description{
