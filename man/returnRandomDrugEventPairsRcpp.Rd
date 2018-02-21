@@ -26,5 +26,5 @@ correlation (\code{rho}).
 }
 \seealso{
 \code{\link{validCorrelation}}, \code{\link{sampleRandomRows}}, 
-         \code{\link{returnRandomPairsRcpp}},
+         \code{\link{returnRandomPairsRcpp}}
 }

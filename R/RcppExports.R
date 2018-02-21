@@ -75,7 +75,8 @@ sampleRandomRows <- function(mat, nrows, n_samples) {
 #'         for the event)
 #' 
 #' @seealso \code{\link{validCorrelation}}, \code{\link{sampleRandomRows}}, 
-#'          \code{\link{returnRandomPairsRcpp}}, 
+#'          \code{\link{returnRandomPairsRcpp}}
+#' @export
 returnRandomDrugEventPairsRcpp <- function(prob_drugs, prob_events, n_wanted_pairs, rho) {
     .Call('_SRSim_returnRandomDrugEventPairsRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_wanted_pairs, rho)
 }
@@ -124,8 +125,52 @@ returnRandomPairsRcpp <- function(margprob, n_wanted_pairs, rho) {
 #' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
 #'          \code{\link{returnRandomDPairsRcpp}},
 #'          \code{\link{validCorrelation}}
+#' @export
 generateCorrelationMatrixRcpp <- function(prob_drugs, prob_events, n_correlated_drugs, rho_drugs, n_correlated_events, rho_events, n_correlated_pairs, rho) {
     .Call('_SRSim_generateCorrelationMatrixRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_correlated_drugs, rho_drugs, n_correlated_events, rho_events, n_correlated_pairs, rho)
+}
+
+#' Simple Random Correlation Matrix
+#' 
+#' @param margprob List with the marginal probabilities
+#'
+#' @return A matrix 
+#' 
+#' @section Warning: 
+#' The matrix that is returned is not guaranteed to be a correlation matrix. 
+#' One still needs to check whether the matrix is indeed postive definite. 
+#' 
+#' @export
+generateSimpleRandomCorrelationMatrix <- function(margprob) {
+    .Call('_SRSim_generateSimpleRandomCorrelationMatrix', PACKAGE = 'SRSim', margprob)
+}
+
+#' Random Correlation Matrix 
+#' 
+#' Generates a correlation matrix for the SR data set. It randomly selects 
+#' a number of drug-event, drug-drug, and event-event pairs to exhibit a 
+#' given correlation. It takes the marginal probabilities of the drugs and 
+#' events into account, to make sure that the pairs can indeed show the 
+#' wanted correlation (see the function \code{\link{validCorrelation}}).
+#' 
+#' @param prob_drugs List with the marginal probabilities of the drugs 
+#' @param prob_events List with the marginal probabilities of the events
+#' @param n_correlated_pairs The number of drug-event pairs that will have correlation \code{rho}
+#' @param rho The correlation for the drug-event pairs 
+#' 
+#' @return \item{corrmat}{A (potential) correlation matrix}
+#'         \item{de_pairs}{A integer matrix with the drug-event pairs}
+#' 
+#' @section Warning: 
+#' The matrix that is returned is not guaranteed to be a correlation matrix. 
+#' One still needs to check whether the matrix is indeed postive definite. 
+#' 
+#' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
+#'          \code{\link{returnRandomDPairsRcpp}},
+#'          \code{\link{validCorrelation}}
+#' @export
+generateRandomCorrelationMatrixRcpp <- function(prob_drugs, prob_events, n_correlated_pairs, rho) {
+    .Call('_SRSim_generateRandomCorrelationMatrixRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_correlated_pairs, rho)
 }
 
 #' From Correlation To Covariance Matrix

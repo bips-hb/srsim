@@ -146,7 +146,8 @@ Rcpp::IntegerMatrix sampleRandomRows (Rcpp::IntegerMatrix mat, int nrows, int n_
 //'         for the event)
 //' 
 //' @seealso \code{\link{validCorrelation}}, \code{\link{sampleRandomRows}}, 
-//'          \code{\link{returnRandomPairsRcpp}}, 
+//'          \code{\link{returnRandomPairsRcpp}}
+//' @export
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix returnRandomDrugEventPairsRcpp (Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events, int n_wanted_pairs, double rho) {
   int n_drugs  = prob_drugs.size() ;
@@ -237,6 +238,7 @@ Rcpp::IntegerMatrix returnRandomPairsRcpp (Rcpp::NumericVector margprob, int n_w
 //' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
 //'          \code{\link{returnRandomDPairsRcpp}},
 //'          \code{\link{validCorrelation}}
+//' @export
 // [[Rcpp::export]]
 Rcpp::NumericMatrix generateCorrelationMatrixRcpp (Rcpp::NumericVector prob_drugs, 
                                                    Rcpp::NumericVector prob_events, 
@@ -289,6 +291,151 @@ Rcpp::NumericMatrix generateCorrelationMatrixRcpp (Rcpp::NumericVector prob_drug
   
   return corrmat ;   
 }
+
+//' Simple Random Correlation Matrix
+//' 
+//' @param margprob List with the marginal probabilities
+//'
+//' @return A matrix 
+//' 
+//' @section Warning: 
+//' The matrix that is returned is not guaranteed to be a correlation matrix. 
+//' One still needs to check whether the matrix is indeed postive definite. 
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix generateSimpleRandomCorrelationMatrix (Rcpp::NumericVector margprob) {
+  int i, j; 
+  int n = margprob.size() ;
+  
+  // initialize correlation matrix
+  Rcpp::NumericMatrix corrmat (n) ; 
+  for (i = 0; i < n; i ++) {
+    for (j = 0; j < n; j ++) {
+      corrmat(i, j) = 0 ; 
+    }
+  }
+  
+  double p_x, p_y;
+  double lower_thres, upper_thres ; 
+  
+  // go over all drug-drug pairs and select a valid random correlation
+  for (i = 0; i < n; i ++) { 
+    p_x = margprob[i] ; 
+    for (j = i+1; j < n; j ++) {
+      p_y = margprob[j] ; 
+      upper_thres = sqrt((p_x * (1 - p_y)) / ((1 - p_x) * p_y)) ; 
+      lower_thres = -1.0 * sqrt((p_x * p_y) / ((1 - p_x) * (1 - p_y))) ;
+      if (upper_thres > 1.0) { 
+        upper_thres = 1.0 ; 
+      } 
+      if (lower_thres < -1.0) {
+        lower_thres = -1.0 ;  
+      }
+      
+      corrmat(i, j) = R::runif(lower_thres, upper_thres) ; 
+      corrmat(j, i) = corrmat(i, j) ; 
+    }
+  }
+  
+  // set diagonal
+  for (i = 0; i < n; i ++) {
+    corrmat(i, i) = 1 ; 
+  }
+  
+  return corrmat ; 
+}
+
+//' Random Correlation Matrix 
+//' 
+//' Generates a correlation matrix for the SR data set. It randomly selects 
+//' a number of drug-event, drug-drug, and event-event pairs to exhibit a 
+//' given correlation. It takes the marginal probabilities of the drugs and 
+//' events into account, to make sure that the pairs can indeed show the 
+//' wanted correlation (see the function \code{\link{validCorrelation}}).
+//' 
+//' @param prob_drugs List with the marginal probabilities of the drugs 
+//' @param prob_events List with the marginal probabilities of the events
+//' @param n_correlated_pairs The number of drug-event pairs that will have correlation \code{rho}
+//' @param rho The correlation for the drug-event pairs 
+//' 
+//' @return \item{corrmat}{A (potential) correlation matrix}
+//'         \item{de_pairs}{A integer matrix with the drug-event pairs}
+//' 
+//' @section Warning: 
+//' The matrix that is returned is not guaranteed to be a correlation matrix. 
+//' One still needs to check whether the matrix is indeed postive definite. 
+//' 
+//' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
+//'          \code{\link{returnRandomDPairsRcpp}},
+//'          \code{\link{validCorrelation}}
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix generateRandomCorrelationMatrixRcpp (Rcpp::NumericVector prob_drugs, 
+                                                         Rcpp::NumericVector prob_events, 
+                                                         int n_correlated_pairs, 
+                                                         double rho) {
+  
+  int i, j; 
+  
+  int n_drugs  = prob_drugs.size() ; 
+  int n_events = prob_events.size() ;
+  int n        = n_drugs + n_events ; 
+  
+  // initialize correlation matrix
+  Rcpp::NumericMatrix corrmat (n) ; 
+  for (i = 0; i < n; i ++) {
+    for (j = 0; j < n; j ++) {
+      corrmat(i, j) = 0 ; 
+    }
+  }
+  
+  // select random pairs 
+  Rcpp::IntegerMatrix de_pairs = returnRandomDrugEventPairsRcpp(prob_drugs, prob_events, n_correlated_pairs, rho) ; 
+  
+  // fill in the matrix with the pairs  
+  for (i = 0; i < n_correlated_pairs; i ++) {
+    corrmat(de_pairs(i, 0), de_pairs(i, 1) + n_drugs) = rho ; 
+    corrmat(de_pairs(i, 1) + n_drugs, de_pairs(i, 0)) = rho ; 
+  }
+  
+  double p_x, p_y;
+  double lower_thres, upper_thres ; 
+  
+  // go over all drug-drug pairs and select a valid random correlation
+  for (i = 0; i < n_drugs; i ++) { 
+    p_x = prob_drugs[i] ; 
+    for (j = i+1; j < n_drugs; j ++) {
+      p_y = prob_drugs[j] ; 
+      upper_thres = sqrt((p_x * (1 - p_y)) / ((1 - p_x) * p_y)) ; 
+      lower_thres = -1.0 * sqrt((p_x * p_y) / ((1 - p_x) * (1 - p_y))) ;
+      
+      corrmat(i, j) = R::runif(lower_thres, upper_thres) ; 
+      corrmat(j, i) = corrmat(i, j) ; 
+    }
+  }
+  
+  // go over all event-event pairs and select a valid random correlation
+  for (i = 0; i < n_events; i ++) { 
+    p_x = prob_events[i] ; 
+    for (j = i+1; j < n_events; j ++) {
+      p_y = prob_events[j] ; 
+      upper_thres = sqrt((p_x * (1 - p_y)) / ((1 - p_x) * p_y)) ; 
+      lower_thres = -1.0 * sqrt((p_x * p_y) / ((1 - p_x) * (1 - p_y))) ;
+      
+      corrmat(n_drugs + i, n_drugs + j) = R::runif(lower_thres, upper_thres) ; 
+      corrmat(n_drugs + j, n_drugs + i) = corrmat(n_drugs + i, n_drugs + j) ; 
+    }
+  }
+  
+  // set diagonal
+  for (i = 0; i < n; i ++) {
+    corrmat(i, i) = 1 ; 
+  }
+  
+  return corrmat ;   
+}
+
 
 
 //' From Correlation To Covariance Matrix

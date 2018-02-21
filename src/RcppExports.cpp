@@ -90,6 +90,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// generateSimpleRandomCorrelationMatrix
+Rcpp::NumericMatrix generateSimpleRandomCorrelationMatrix(Rcpp::NumericVector margprob);
+RcppExport SEXP _SRSim_generateSimpleRandomCorrelationMatrix(SEXP margprobSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type margprob(margprobSEXP);
+    rcpp_result_gen = Rcpp::wrap(generateSimpleRandomCorrelationMatrix(margprob));
+    return rcpp_result_gen;
+END_RCPP
+}
+// generateRandomCorrelationMatrixRcpp
+Rcpp::NumericMatrix generateRandomCorrelationMatrixRcpp(Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events, int n_correlated_pairs, double rho);
+RcppExport SEXP _SRSim_generateRandomCorrelationMatrixRcpp(SEXP prob_drugsSEXP, SEXP prob_eventsSEXP, SEXP n_correlated_pairsSEXP, SEXP rhoSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_drugs(prob_drugsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_events(prob_eventsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_correlated_pairs(n_correlated_pairsSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    rcpp_result_gen = Rcpp::wrap(generateRandomCorrelationMatrixRcpp(prob_drugs, prob_events, n_correlated_pairs, rho));
+    return rcpp_result_gen;
+END_RCPP
+}
 // corr2cov
 Rcpp::NumericMatrix corr2cov(Rcpp::NumericMatrix corrmat, Rcpp::NumericVector margprob);
 RcppExport SEXP _SRSim_corr2cov(SEXP corrmatSEXP, SEXP margprobSEXP) {
@@ -166,6 +191,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SRSim_returnRandomDrugEventPairsRcpp", (DL_FUNC) &_SRSim_returnRandomDrugEventPairsRcpp, 4},
     {"_SRSim_returnRandomPairsRcpp", (DL_FUNC) &_SRSim_returnRandomPairsRcpp, 3},
     {"_SRSim_generateCorrelationMatrixRcpp", (DL_FUNC) &_SRSim_generateCorrelationMatrixRcpp, 8},
+    {"_SRSim_generateSimpleRandomCorrelationMatrix", (DL_FUNC) &_SRSim_generateSimpleRandomCorrelationMatrix, 1},
+    {"_SRSim_generateRandomCorrelationMatrixRcpp", (DL_FUNC) &_SRSim_generateRandomCorrelationMatrixRcpp, 4},
     {"_SRSim_corr2cov", (DL_FUNC) &_SRSim_corr2cov, 2},
     {"_SRSim_mvrnormArma", (DL_FUNC) &_SRSim_mvrnormArma, 4},
     {"_SRSim_threshold", (DL_FUNC) &_SRSim_threshold, 1},
