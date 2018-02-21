@@ -292,6 +292,64 @@ Rcpp::NumericMatrix generateCorrelationMatrixRcpp (Rcpp::NumericVector prob_drug
   return corrmat ;   
 }
 
+//' Block Correlation Matrix
+//' 
+//' @param margprob List with the marginal probabilities
+//' @param blocksize The size of the blocks
+//' 
+//' @return A matrix
+//' 
+//' @section Warning: 
+//' The matrix that is returned is not guaranteed to be a correlation matrix. 
+//' One still needs to check whether the matrix is indeed postive definite. 
+//'
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix generateBlockCorrelationMatrixRcpp (Rcpp::NumericVector margprob, 
+                                                           int blocksize,
+                                                           double rho) {
+  int i, j, index1, index2; 
+  int n = margprob.size() ;
+  
+  // initialize correlation matrix
+  Rcpp::NumericMatrix corrmat (n) ; 
+  for (i = 0; i < n; i ++) {
+    for (j = 0; j < n; j ++) {
+      corrmat(i, j) = 0 ; 
+    }
+  }
+  
+  double p_x, p_y;
+  double lower_thres, upper_thres ; 
+  
+  // go through all the blocks
+  for (int b = 0 ; b < (n / blocksize); b++) {
+    for (i = 0; i < blocksize; i ++) {
+      index1 = b*blocksize + i ; 
+      p_x = margprob[index1] ; 
+      for (j = 0; j < blocksize; j ++) {
+        index2 = b*blocksize + j ; 
+        p_y = margprob[index2] ; 
+        upper_thres = sqrt((p_x * (1 - p_y)) / ((1 - p_x) * p_y)) ; 
+        lower_thres = -1.0 * sqrt((p_x * p_y) / ((1 - p_x) * (1 - p_y))) ;
+        if (rho > upper_thres) { 
+          corrmat(index1, index2) = upper_thres ; 
+          corrmat(index2, index1) = upper_thres ; 
+        } else {
+          corrmat(index1, index2) = rho ; 
+          corrmat(index2, index1) = rho ;
+        }
+      }
+    }
+  }
+  
+  for (i = 0; i < n; i ++) {
+     corrmat(i,i) = 1.0 ;  
+  }
+  
+  return corrmat ; 
+}
+
 //' Simple Random Correlation Matrix
 //' 
 //' @param margprob List with the marginal probabilities

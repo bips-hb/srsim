@@ -130,6 +130,22 @@ generateCorrelationMatrixRcpp <- function(prob_drugs, prob_events, n_correlated_
     .Call('_SRSim_generateCorrelationMatrixRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_correlated_drugs, rho_drugs, n_correlated_events, rho_events, n_correlated_pairs, rho)
 }
 
+#' Block Correlation Matrix
+#' 
+#' @param margprob List with the marginal probabilities
+#' @param blocksize The size of the blocks
+#' 
+#' @return A matrix
+#' 
+#' @section Warning: 
+#' The matrix that is returned is not guaranteed to be a correlation matrix. 
+#' One still needs to check whether the matrix is indeed postive definite. 
+#'
+#' @export
+generateBlockCorrelationMatrixRcpp <- function(margprob, blocksize, rho) {
+    .Call('_SRSim_generateBlockCorrelationMatrixRcpp', PACKAGE = 'SRSim', margprob, blocksize, rho)
+}
+
 #' Simple Random Correlation Matrix
 #' 
 #' @param margprob List with the marginal probabilities
