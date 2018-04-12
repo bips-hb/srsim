@@ -16,7 +16,8 @@ Depends:
 	tidyr,
 	mvtnorm,
 	corpcor,
-	pcalg
+	pcalg,
+	Rgraphviz
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 License: GPL-3
 Encoding: UTF-8

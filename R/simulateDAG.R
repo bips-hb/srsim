@@ -37,7 +37,7 @@ simulateDAG <- function(n_reports = 100,
                         beta_events = 5.0,
                         method = 'er', 
                         exp_degree = 3, 
-                        theta_drugs = 2,
+                        theta_drugs = 1.5,
                         n_correlated_pairs = 2,
                         theta = 2, 
                         valid_reports = TRUE, 
@@ -55,7 +55,25 @@ simulateDAG <- function(n_reports = 100,
   prob_drugs <- rep(NA, n_drugs) 
   prob_events <- rep(NA, n_events)
   
-  DAG <- randDAG(n_drugs, exp_degree, method = method)  
+  # create the labels used for the drug and the event nodes
+  drug_labels <- sprintf("drug%d", 1:n_drugs)
+  event_labels <- sprintf("event%d", 1:n_events)
+  
+  DAG <- randDAG(n_drugs, exp_degree, method = method, weighted = TRUE, wFUN = function(m){theta_drugs})  
+  
+  # change the node labels for the drugs 
+  graph::nodes(DAG) <- drug_labels
+  
+  # add the event nodes to the DAG
+  DAG <- graph::addNode(event_labels, DAG)
+  
+  # add random drug and edge connections 
+  drug_event_combinations <- expand.grid(drug_labels, event_labels) 
+  colnames(drug_event_combinations) <- c("drug_id", "event_id")
+  drug_event_pairs <- sample_n(drug_event_combinations, n_correlated_pairs, replace = FALSE)
+  
+  # all connections between drugs and events get the weight theta
+  DAG <- graph::addEdge(sprintf("%s", drug_event_pairs$drug_id), sprintf("%s", drug_event_pairs$event_id), DAG, rep(theta, n_correlated_pairs))
   
   return(
     list(
