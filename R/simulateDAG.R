@@ -33,8 +33,10 @@ simulateDAG <- function(n_reports = 100,
                         n_events = 10,
                         alpha_drugs = 1.0,
                         beta_drugs = 5.0,
+                        prob_drugs = rbeta(n_drugs, alpha_drugs, beta_drugs), 
                         alpha_events = 1.0,
                         beta_events = 5.0,
+                        prob_events = rbeta(n_events, alpha_events, beta_events), 
                         method = 'er', 
                         exp_degree = 3, 
                         theta_drugs = 1.5,
@@ -45,20 +47,20 @@ simulateDAG <- function(n_reports = 100,
                         seed = NULL,
                         verbose = TRUE) { 
   
+  n <- n_drugs + n_events 
+  beta_drugs <- log(theta_drugs) # the regression coefficient for the drug-drug pairs
+  beta <- log(theta) # the regression coefficient for the drug-event pairs 
+  
   # set the seed
   if (!is.null(seed)) {
     set.seed(seed)
   }
   
-  # initialize a list with the marginal probabilities for 
-  # the drugs and the events
-  prob_drugs <- rep(NA, n_drugs) 
-  prob_events <- rep(NA, n_events)
-  
   # create the labels used for the drug and the event nodes
   drug_labels <- sprintf("drug%d", 1:n_drugs)
   event_labels <- sprintf("event%d", 1:n_events)
   
+  # create a random DAG for the drugs 
   DAG <- randDAG(n_drugs, exp_degree, method = method, weighted = TRUE, wFUN = function(m){theta_drugs})  
   
   # change the node labels for the drugs 
@@ -75,9 +77,114 @@ simulateDAG <- function(n_reports = 100,
   # all connections between drugs and events get the weight theta
   DAG <- graph::addEdge(sprintf("%s", drug_event_pairs$drug_id), sprintf("%s", drug_event_pairs$event_id), DAG, rep(theta, n_correlated_pairs))
   
+  # get the adjacency matrix with the weights
+  adjacency_matrix <- as(DAG, "matrix")
+  
+  # transform to igraph
+  DAG <- igraph::igraph.from.graphNEL(DAG)
+  
+  # add the attributes to the nodes of the graph
+  DAG <- DAG %>% 
+    igraph::set_vertex_attr("margprob", index = 1:n, value = c(prob_drugs, prob_events)) %>% 
+    igraph::set_vertex_attr("done", index = 1:n, value = FALSE) 
+  
+  
+  max_in_degree <- max(igraph::degree(DAG, mode = "in"))
+  
+  nodes <- dplyr::tibble(
+     label = c(drug_labels, event_labels), 
+     in_degree = as.factor(igraph::degree(DAG, mode = "in")), 
+     n_done = 0, # number of incoming edges processed
+     margprob = c(prob_drugs, prob_events)
+  ) 
+  
+  # add columns for the betas 
+  for (beta_label in sprintf("beta%d", 0:max_in_degree)) {
+    nodes <- tibble::add_column(nodes, !!(beta_label) := 0)
+  }
+  
+  # add columns for the parents 
+  for (parent_label in sprintf("parent%d", 1:max_in_degree)) { 
+    nodes <- tibble::add_column(nodes, !!(parent_label) := NA)
+  }
+  
+  edgelist <- igraph::as_edgelist(DAG)
+  
+  edges <- tibble(
+    from = edgelist[,1], 
+    to = edgelist[,2]
+  )
+  
+  # walk through the edges and add the information to the nodes tibble
+  for (i in 1:nrow(edges)) {
+    to <- edges[i,]$to 
+    from <- edges[i,]$from 
+    
+    current_parent <- nodes[nodes$label == to,]$n_done + 1
+    beta_label <- sprintf("beta%d", current_parent)
+    parent_label <- sprintf("parent%d", current_parent)
+
+    if (startsWith(to, "drug")) { 
+      nodes[nodes$label == to,][[beta_label]] <- beta_drugs
+    } else { 
+      nodes[nodes$label == to,][[beta_label]] <- beta
+    }
+    
+    nodes[nodes$label == to,][[parent_label]] <- from
+    
+    nodes[nodes$label == to,]$n_done <- nodes[nodes$label == to,]$n_done + 1
+  }
+  
+  # set the beta0 for the logistic regression
+  nodes <- nodes %>% mutate(
+    beta0 = log(margprob / (1 - margprob)),
+    n_done = 0
+  )
+  
+  print(nodes)
+  
+  for (i in 1:nrow(nodes)) {
+    # update the beta0's in case there are parents
+    n_parents <-nodes[i,]$in_degree
+    print(n_parents)
+    if (n_parents != 0) {
+      print(1:(as.numeric(n_parents)-1))
+      for (current_parent in 1:max_in_degree) { 
+        beta_label <- sprintf("beta%d", current_parent)
+        parent_label <- sprintf("parent%d", current_parent)
+        
+        parent <- nodes[i,][[parent_label]]
+        
+        if (is.na(parent)) {
+         break  
+        }
+        
+        beta_parent <- nodes[nodes$label == parent,][[beta_label]] 
+        margprob_parent <- nodes[nodes$label == parent,]$margprob
+        
+        print(parent)
+        print(beta_parent)
+        print(margprob_parent)
+        
+        nodes[i,]$beta0 <- nodes[i,]$beta0 - beta_parent*margprob_parent 
+      }
+    }
+  }
+  
+  ###### generating the reports 
+  n_reports_done <- 0 # number of valid reports generated
+
+  # TODO check whether report is valid 
+  
+  
+  
+  
+  
   return(
     list(
-      DAG = DAG 
+      DAG = DAG, 
+      adjacency_matrix = adjacency_matrix,
+      nodes = nodes
     )
   )
 }
