@@ -637,6 +637,37 @@ Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, a
   }
 }
 
+//' Simulate a single report from a DAG
+// [[Rcpp::export]] 
+Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::NumericVector n_parents, int max_n_parents, Rcpp::NumericMatrix betas, bool verbose) {
+  int i, j ; 
+  int n = n_drugs + n_events ; 
+
+  // variable to hold the current report 
+  Rcpp::NumericVector report(n) ; 
+  Rcpp::LogicalVector drawn(n) ;
+  
+  for (i = 0; i < n; i++) {
+    drawn[i] = false;  
+  }
+
+  int n_drawn = 0 ; 
+  
+  // go over all nodes that have no parents 
+  for (i = 0; i < n; i ++) {
+    if (n_parents[i] == 0) {
+       
+    }
+  }
+  
+  for (int k = 1; k <= max_n_parents; k++) {
+     
+  }
+  
+  return(report) ; 
+}
+
+
 //' Create 2 x 2 Tables 
 //' 
 //' Creates a data frame containing all 2 x 2 contingency tables 

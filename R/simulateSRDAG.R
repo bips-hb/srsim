@@ -102,10 +102,27 @@ simulateSRDAG <- function(n_reports = 100,
     ) %>% 
     arrange(in_degree) 
   
+  print(DAG) 
+  
   if (verbose) { 
     pb <- txtProgressBar(min = 0, max = n_reports, initial = 0, char = "=",
                  style = 3, file = "")
   }
+  
+  # information needed:
+  # nodes id 
+  # nodes label
+  # no. parents
+  # parents of each node 
+  # betas of each node 
+  
+  # matrix with the betas
+  betas <- matrix(log(DAG$adjecency_matrix), n, n)
+  betas[betas == -Inf] <- 0
+  
+  report <- simulateReportDAG(n_drugs, n_events, nodes$id, nodes$in_degree, DAG$max_in_degree, betas, verbose)
+  
+  return(sr)
   
   n_reports_generated <- 1
   while (n_reports_generated <= n_reports) {

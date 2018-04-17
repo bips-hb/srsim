@@ -13,7 +13,7 @@ simulateSRDAG(n_reports = 100, n_drugs = 10, n_events = 10,
   n_events = length(prob_events), prob_drugs = prob_drugs, prob_events =
   prob_events, method = method, exp_degree = exp_degree, theta_drugs =
   theta_drugs, n_correlated_pairs = n_correlated_pairs, theta = theta, seed =
-  seed), verbose = TRUE)
+  seed), valid_reports = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{n_reports}{Number of reports (Default: 100)}
@@ -48,9 +48,9 @@ simulateSRDAG(n_reports = 100, n_drugs = 10, n_events = 10,
 
 \item{DAG}{The DAG used for the simulation. By default generated with the other parameters given to this function}
 
-\item{verbose}{Verbosity (Default: \code{TRUE})}
-
 \item{valid_reports}{If \code{TRUE}, only valid reports (with at least one drug and at least one event) are accepted. (Default: \code{TRUE})}
+
+\item{verbose}{Verbosity (Default: \code{TRUE})}
 
 \item{max_iter}{Maximum number of iterations (Default: 1000)}
 }

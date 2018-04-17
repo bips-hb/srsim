@@ -261,6 +261,11 @@ generateReports <- function(n_reports, means, L, valid_reports, n_drugs, n_event
     .Call('_SRSim_generateReports', PACKAGE = 'SRSim', n_reports, means, L, valid_reports, n_drugs, n_events, verbose)
 }
 
+#' Simulate a single report from a DAG
+simulateReportDAG <- function(n_drugs, n_events, id, n_parents, max_n_parents, betas, verbose) {
+    .Call('_SRSim_simulateReportDAG', PACKAGE = 'SRSim', n_drugs, n_events, id, n_parents, max_n_parents, betas, verbose)
+}
+
 #' Create 2 x 2 Tables 
 #' 
 #' Creates a data frame containing all 2 x 2 contingency tables 
