@@ -1,5 +1,8 @@
-#' Spontaneous Reporting Data
+#' Random Directed Acyclic Graph for SR Data
 #'
+#' \code{simulateDAG} creates a random directed acyclic graph that can be used
+#' for simulating SR data
+#' \cr\cr
 #' \strong{Valid Reports} Not any binary sequence is a valid report. Each report 
 #' should contain at least one drug and at least one event  (otherwise it would 
 #' never been sent to the spontaneous reporitng sytem). 
@@ -7,29 +10,33 @@
 #' want to check the validity and wants to allow any binary sequence, one can set 
 #' \code{valid_reports} to \code{FALSE}. 
 #' 
-#' @param n_reports Number of reports (Default: 100)
 #' @param n_drugs Number of drugs (Default: 10)
 #' @param n_events Number of adverse drug events (Default: 10)
 #' @param alpha_drugs Alpha parameter for the drug marginal probabilities (Default: 1.0)
 #' @param beta_drugs Beta parameter for the drug marginal probabilities (Default: 5.0)
+#' @param prob_drugs Specific array with the marginal probability of the drugs (Default: Beta distribution)
 #' @param alpha_events Alpha parameter for the event marginal probabilities (Default: 1.0)
 #' @param beta_events Beta parameter for the event marginal probabilities (Default: 5.0)
+#' @param prob_events Specific array with the marginal probability of the events (Default: Beta distribution)
+#' @param method The method used for generating the random DAG for the drugs (Default: \code{'er'}, Erdos-Renyi graph)
+#' @param exp_degree Average degree between the drugs in the random DAG (Default: 3)
+#' @param theta_drugs The increase in odds-ratio when there is a connection between two drugs (Default: 1.5)
 #' @param n_correlated_pairs Number of drug-event pairs that will exhibit a nonzero correlation (Default: 2)
-#' @param valid_reports If \code{TRUE}, only valid reports (with at least one drug and at least one event) are accepted. (Default: \code{TRUE})
-#' @param max_iter Maximum number of iterations (Default: 1000) 
+#' @param theta Increase in odds-ratio when there is an edge going from a drug to an event (Default: 2.0)
 #' @param seed The seed used by the RNG (Default: automatically set)
 #' @param verbose Verbosity (Default: \code{TRUE})
 #'
-#' @return \item{sr}{A data frame with the simulated reports. The columns are named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
+#' @return \item{nodes}{A tibble containing all the information on each node/variate}
+#'         \item{DAG}{The DAG as an \code{igraph} object} 
 #'         \item{prob_drugs}{A list with marginal probabilities of the drugs}
 #'         \item{prob_events}{A list with marginal probabilities of the events}
-#'         \item{corrmat}{The correlation matrix}
-#'
+#'         \item{max_in_degree}{The maximal in-degree found in the graph \code{DAG}}
+#'         \item{adjacency_matrix}{The adjencency matrix for the graph \code{DAG}} 
+#'  
 #' @seealso \code{\link{create2x2Tables}}, 
 #'          \code{\link{validReport}}              
 #' @export
-simulateDAG <- function(n_reports = 100, 
-                        n_drugs = 10, 
+simulateDAG <- function(n_drugs = 10, 
                         n_events = 10,
                         alpha_drugs = 1.0,
                         beta_drugs = 5.0,
@@ -41,56 +48,45 @@ simulateDAG <- function(n_reports = 100,
                         exp_degree = 3, 
                         theta_drugs = 1.5,
                         n_correlated_pairs = 2,
-                        theta = 2, 
-                        valid_reports = TRUE, 
-                        max_iter = 1000, 
+                        theta = 2,
                         seed = NULL,
                         verbose = TRUE) { 
-  
-  n <- n_drugs + n_events 
-  beta_drugs <- log(theta_drugs) # the regression coefficient for the drug-drug pairs
-  beta <- log(theta) # the regression coefficient for the drug-event pairs 
   
   # set the seed
   if (!is.null(seed)) {
     set.seed(seed)
   }
   
+  n <- n_drugs + n_events # total number of variates in the graph 
+  
   # create the labels used for the drug and the event nodes
   drug_labels <- sprintf("drug%d", 1:n_drugs)
   event_labels <- sprintf("event%d", 1:n_events)
   
-  # create a random DAG for the drugs 
+  beta_drugs <- log(theta_drugs) # the regression coefficient for the drug-drug pairs
+  beta <- log(theta) # the regression coefficient for the drug-event pairs 
+  
+  ### create a random DAG for the drugs --------------
   DAG <- randDAG(n_drugs, exp_degree, method = method, weighted = TRUE, wFUN = function(m){theta_drugs})  
-  
-  # change the node labels for the drugs 
-  graph::nodes(DAG) <- drug_labels
-  
-  # add the event nodes to the DAG
-  DAG <- graph::addNode(event_labels, DAG)
+  graph::nodes(DAG) <- drug_labels            # change the node labels for the drugs 
+  DAG <- graph::addNode(event_labels, DAG)    # add the event nodes to the DAG
   
   # add random drug and edge connections 
-  drug_event_combinations <- expand.grid(drug_labels, event_labels) 
-  colnames(drug_event_combinations) <- c("drug_id", "event_id")
-  drug_event_pairs <- sample_n(drug_event_combinations, n_correlated_pairs, replace = FALSE)
+  drug_event_pairs <- expand.grid(drug_labels, event_labels) 
+  colnames(drug_event_pairs) <- c("drug_id", "event_id")
+  drug_event_pairs <- sample_n(drug_event_pairs, n_correlated_pairs, replace = FALSE)
   
   # all connections between drugs and events get the weight theta
   DAG <- graph::addEdge(sprintf("%s", drug_event_pairs$drug_id), sprintf("%s", drug_event_pairs$event_id), DAG, rep(theta, n_correlated_pairs))
   
-  # get the adjacency matrix with the weights
   adjacency_matrix <- as(DAG, "matrix")
   
-  # transform to igraph
-  DAG <- igraph::igraph.from.graphNEL(DAG)
+  DAG <- igraph::igraph.from.graphNEL(DAG)    # transform to igraph
   
-  # add the attributes to the nodes of the graph
-  DAG <- DAG %>% 
-    igraph::set_vertex_attr("margprob", index = 1:n, value = c(prob_drugs, prob_events)) %>% 
-    igraph::set_vertex_attr("done", index = 1:n, value = FALSE) 
+  max_in_degree <- max(igraph::degree(DAG, mode = "in")) # maximal in-degree in the random DAG
+  ### DONE with creating the random DAG --------------
   
-  
-  max_in_degree <- max(igraph::degree(DAG, mode = "in"))
-  
+  # a data frame that contains all the data for each node (or variate)
   nodes <- dplyr::tibble(
      label = c(drug_labels, event_labels), 
      in_degree = as.factor(igraph::degree(DAG, mode = "in")), 
@@ -108,8 +104,8 @@ simulateDAG <- function(n_reports = 100,
     nodes <- tibble::add_column(nodes, !!(parent_label) := NA)
   }
   
+  # create also a tibble with all the edges
   edgelist <- igraph::as_edgelist(DAG)
-  
   edges <- tibble(
     from = edgelist[,1], 
     to = edgelist[,2]
@@ -117,74 +113,67 @@ simulateDAG <- function(n_reports = 100,
   
   # walk through the edges and add the information to the nodes tibble
   for (i in 1:nrow(edges)) {
-    to <- edges[i,]$to 
+    to   <- edges[i,]$to 
     from <- edges[i,]$from 
     
-    current_parent <- nodes[nodes$label == to,]$n_done + 1
-    beta_label <- sprintf("beta%d", current_parent)
+    current_parent <- nodes[nodes$label == to,]$n_done + 1 # the current parent that needs to be filled in
+    
+    beta_label   <- sprintf("beta%d", current_parent)
     parent_label <- sprintf("parent%d", current_parent)
 
+    # add the parent to the nodes tibble
+    nodes[nodes$label == to,][[parent_label]] <- from
+    
+    # add the appropriate beta value for this edge
     if (startsWith(to, "drug")) { 
       nodes[nodes$label == to,][[beta_label]] <- beta_drugs
     } else { 
       nodes[nodes$label == to,][[beta_label]] <- beta
     }
     
-    nodes[nodes$label == to,][[parent_label]] <- from
-    
+    # one more done
     nodes[nodes$label == to,]$n_done <- nodes[nodes$label == to,]$n_done + 1
   }
   
-  # set the beta0 for the logistic regression
-  nodes <- nodes %>% mutate(
-    beta0 = log(margprob / (1 - margprob)),
-    n_done = 0
+  ### Set the intercepts, beta0, appropriately 
+  nodes <- nodes %>% dplyr::mutate(
+    beta0 = log(margprob / (1 - margprob))
+  ) %>% dplyr::select(
+    -n_done 
   )
   
-  print(nodes)
-  
+  # walk through the nodes. If there are parents, update the beta0
   for (i in 1:nrow(nodes)) {
-    # update the beta0's in case there are parents
-    n_parents <-nodes[i,]$in_degree
-    print(n_parents)
+    n_parents <- nodes[i,]$in_degree
+    # if there are parents, iterate over them
     if (n_parents != 0) {
-      print(1:(as.numeric(n_parents)-1))
       for (current_parent in 1:max_in_degree) { 
-        beta_label <- sprintf("beta%d", current_parent)
+        beta_label   <- sprintf("beta%d", current_parent)
         parent_label <- sprintf("parent%d", current_parent)
         
         parent <- nodes[i,][[parent_label]]
-        
         if (is.na(parent)) {
-         break  
+          break  
         }
         
+        # get the beta and the marginal probability of the parent
         beta_parent <- nodes[nodes$label == parent,][[beta_label]] 
         margprob_parent <- nodes[nodes$label == parent,]$margprob
         
-        print(parent)
-        print(beta_parent)
-        print(margprob_parent)
-        
+        # simply subtract their product to get the appropriate beta0
         nodes[i,]$beta0 <- nodes[i,]$beta0 - beta_parent*margprob_parent 
       }
     }
   }
   
-  ###### generating the reports 
-  n_reports_done <- 0 # number of valid reports generated
-
-  # TODO check whether report is valid 
-  
-  
-  
-  
-  
   return(
     list(
+      nodes = nodes,
       DAG = DAG, 
-      adjacency_matrix = adjacency_matrix,
-      nodes = nodes
+      prob_drugs = prob_drugs,
+      prob_events = prob_events,
+      max_in_degree = max_in_degree,
+      adjacency_matrix = adjacency_matrix
     )
   )
 }
