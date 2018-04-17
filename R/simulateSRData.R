@@ -171,8 +171,8 @@ simulateSRData <- function(n_reports = 100,
     set.seed(seed)
   }
   
-  n_drugs = length(prob_drugs)
-  n_events = length(prob_events)
+  n_drugs <- length(prob_drugs)
+  n_events <- length(prob_events)
   
   # the marginal probabilities
   margprob <- c(prob_drugs, prob_events)

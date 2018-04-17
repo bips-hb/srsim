@@ -53,13 +53,6 @@ simulateDAG(n_drugs = 10, n_events = 10, alpha_drugs = 1,
 \description{
 \code{simulateDAG} creates a random directed acyclic graph that can be used
 for simulating SR data
-\cr\cr
-\strong{Valid Reports} Not any binary sequence is a valid report. Each report 
-should contain at least one drug and at least one event  (otherwise it would 
-never been sent to the spontaneous reporitng sytem). 
-While generating reports, we make sure that this is indeed the case. When one does not
-want to check the validity and wants to allow any binary sequence, one can set 
-\code{valid_reports} to \code{FALSE}.
 }
 \seealso{
 \code{\link{create2x2Tables}}, 
