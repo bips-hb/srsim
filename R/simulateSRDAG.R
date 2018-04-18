@@ -79,6 +79,10 @@ simulateSRDAG <- function(n_reports = 100,
   n_events <- length(prob_events)
   n <- n_drugs + n_events
   
+  if (verbose) {
+    cat("Creating DAG...") 
+  }
+  
   DAG <- SRSim::simulateDAG(n_drugs = length(prob_drugs), 
                            n_events = length(prob_events), 
                            prob_drugs = prob_drugs, 
@@ -90,11 +94,16 @@ simulateSRDAG <- function(n_reports = 100,
                            theta = theta,
                            seed = seed)
   
+  if (verbose) {
+    cat("DONE Creating DAG...") 
+  }
+  
   # the marginal probabilities
   margprob <- c(prob_drugs, prob_events)
   
-  sr <- dplyr::as_tibble(data.frame(matrix(NA, nrow = n_reports, ncol = n)))
-  colnames(sr) <- c(sprintf("drug%d", 1:n_drugs), sprintf("event%d", 1:n_events))
+  #sr <- dplyr::as_tibble(data.frame(matrix(NA, nrow = n_reports, ncol = n)))
+  #colnames(sr) <- c(sprintf("drug%d", 1:n_drugs), sprintf("event%d", 1:n_events))
+  sr <- matrix(NA, nrow = n_reports, ncol = n)
   
   # get the nodes and sort them to in degree
   nodes <- DAG$nodes %>% 
@@ -102,8 +111,6 @@ simulateSRDAG <- function(n_reports = 100,
       id = 1:n()
     ) %>% 
     arrange(in_degree) 
-  
-  print(DAG) 
   
   if (verbose) { 
     pb <- txtProgressBar(min = 0, max = n_reports, initial = 0, char = "=",
@@ -118,10 +125,20 @@ simulateSRDAG <- function(n_reports = 100,
   # betas of each node 
   
   # matrix with the betas
-  print("getting the betas")
-  print(DAG$adjacency_matrix)
+  if (verbose) {
+    cat("Obtaining the betas...")
+  }
+  
   betas <- matrix(log(DAG$adjacency_matrix), n, n)
   betas[betas == -Inf] <- 0
+  
+  if (verbose) {
+    cat("DONE Obtaining the betas...")
+  }
+  
+  if (verbose) {
+    cat("Creating the reports...")
+  }
   
   n_reports_generated <- 0
   
@@ -140,10 +157,12 @@ simulateSRDAG <- function(n_reports = 100,
     if (valid_reports) {
       if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {
         sr[n_reports_generated,] <- report
+        #sr <- dplyr::add_row(sr, report)
         n_reports_generated <- n_reports_generated + 1
       }
     } else {
       sr[n_reports_generated,] <- report
+      #sr <- dplyr::add_row(sr, report)
       n_reports_generated <- n_reports_generated + 1
     }
     
@@ -151,6 +170,10 @@ simulateSRDAG <- function(n_reports = 100,
       setTxtProgressBar(pb, n_reports_generated)
     }
     
+  }
+  
+  if (verbose) {
+    cat("DONE generating SR data")
   }
   
   return(
