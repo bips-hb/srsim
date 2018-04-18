@@ -72,22 +72,23 @@ simulateSRDAG <- function(n_reports = 100,
                           n_correlated_pairs = 2,
                           theta = 2,
                           seed = NULL,
-                          DAG = SRSim::simulateDAG(n_drugs = length(prob_drugs), 
-                                             n_events = length(prob_events), 
-                                             prob_drugs = prob_drugs, 
-                                             prob_events = prob_events, 
-                                             method = method, 
-                                             exp_degree = exp_degree, 
-                                             theta_drugs = theta_drugs,
-                                             n_correlated_pairs = n_correlated_pairs,
-                                             theta = theta,
-                                             seed = seed),
                           valid_reports = TRUE, 
                           verbose = TRUE) { 
   
   n_drugs <- length(prob_drugs)
   n_events <- length(prob_events)
   n <- n_drugs + n_events
+  
+  DAG <- SRSim::simulateDAG(n_drugs = length(prob_drugs), 
+                           n_events = length(prob_events), 
+                           prob_drugs = prob_drugs, 
+                           prob_events = prob_events, 
+                           method = method, 
+                           exp_degree = exp_degree, 
+                           theta_drugs = theta_drugs,
+                           n_correlated_pairs = n_correlated_pairs,
+                           theta = theta,
+                           seed = seed)
   
   # the marginal probabilities
   margprob <- c(prob_drugs, prob_events)
@@ -117,14 +118,54 @@ simulateSRDAG <- function(n_reports = 100,
   # betas of each node 
   
   # matrix with the betas
-  betas <- matrix(log(DAG$adjecency_matrix), n, n)
+  print("getting the betas")
+  print(DAG$adjacency_matrix)
+  betas <- matrix(log(DAG$adjacency_matrix), n, n)
   betas[betas == -Inf] <- 0
   
-  report <- simulateReportDAG(n_drugs, n_events, nodes$id, nodes$in_degree, DAG$max_in_degree, betas, verbose)
+  n_reports_generated <- 0
   
-  return(sr)
+  while (n_reports_generated <= n_reports) {
+    report <-
+      simulateReportDAG(
+        n_drugs,
+        n_events,
+        nodes$id,
+        nodes$in_degree,
+        DAG$max_in_degree,
+        nodes$beta0,
+        betas,
+        verbose
+      )
+    if (valid_reports) {
+      if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {
+        sr[n_reports_generated,] <- report
+        n_reports_generated <- n_reports_generated + 1
+      }
+    } else {
+      sr[n_reports_generated,] <- report
+      n_reports_generated <- n_reports_generated + 1
+    }
+    
+    if (verbose) {
+      setTxtProgressBar(pb, n_reports_generated)
+    }
+    
+  }
+  
+  return(
+    list( 
+      sr = sr, 
+      prob_drugs = prob_drugs,
+      prob_events = prob_events, 
+      adjecency_matrix = DAG$adjacency_matrix
+    )
+  )
+  
+  return(report)
   
   n_reports_generated <- 1
+  
   while (n_reports_generated <= n_reports) {
     
     report <- rep(NA, n)

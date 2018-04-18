@@ -4,9 +4,16 @@
 \alias{simulateReportDAG}
 \title{Simulate a single report from a DAG}
 \usage{
-simulateReportDAG(n_drugs, n_events, id, n_parents, max_n_parents, betas,
+simulateReportDAG(n_drugs, n_events, id, n_parents, max_n_parents, beta0, betas,
   verbose)
 }
+\arguments{
+\item{n_drugs}{The number of drugs in the SR}
+
+\item{n_events}{The number of events in the SR}
+
+\item{id}{A list with the indices of the drugs and the events}
+}
 \description{
-Simulate a single report from a DAG
+Returns a single report based on a DAG structure.
 }

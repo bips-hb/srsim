@@ -262,8 +262,15 @@ generateReports <- function(n_reports, means, L, valid_reports, n_drugs, n_event
 }
 
 #' Simulate a single report from a DAG
-simulateReportDAG <- function(n_drugs, n_events, id, n_parents, max_n_parents, betas, verbose) {
-    .Call('_SRSim_simulateReportDAG', PACKAGE = 'SRSim', n_drugs, n_events, id, n_parents, max_n_parents, betas, verbose)
+#' 
+#' Returns a single report based on a DAG structure. 
+#' 
+#' @param n_drugs The number of drugs in the SR
+#' @param n_events The number of events in the SR
+#' @param id A list with the indices of the drugs and the events 
+#' 
+simulateReportDAG <- function(n_drugs, n_events, id, n_parents, max_n_parents, beta0, betas, verbose) {
+    .Call('_SRSim_simulateReportDAG', PACKAGE = 'SRSim', n_drugs, n_events, id, n_parents, max_n_parents, beta0, betas, verbose)
 }
 
 #' Create 2 x 2 Tables 

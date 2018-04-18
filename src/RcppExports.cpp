@@ -183,8 +183,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // simulateReportDAG
-Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::NumericVector n_parents, int max_n_parents, Rcpp::NumericMatrix betas, bool verbose);
-RcppExport SEXP _SRSim_simulateReportDAG(SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP idSEXP, SEXP n_parentsSEXP, SEXP max_n_parentsSEXP, SEXP betasSEXP, SEXP verboseSEXP) {
+Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::NumericVector n_parents, int max_n_parents, Rcpp::NumericVector beta0, Rcpp::NumericMatrix betas, bool verbose);
+RcppExport SEXP _SRSim_simulateReportDAG(SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP idSEXP, SEXP n_parentsSEXP, SEXP max_n_parentsSEXP, SEXP beta0SEXP, SEXP betasSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -193,9 +193,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type id(idSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type n_parents(n_parentsSEXP);
     Rcpp::traits::input_parameter< int >::type max_n_parents(max_n_parentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type beta0(beta0SEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type betas(betasSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(simulateReportDAG(n_drugs, n_events, id, n_parents, max_n_parents, betas, verbose));
+    rcpp_result_gen = Rcpp::wrap(simulateReportDAG(n_drugs, n_events, id, n_parents, max_n_parents, beta0, betas, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,7 +229,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SRSim_mvrnormArma", (DL_FUNC) &_SRSim_mvrnormArma, 4},
     {"_SRSim_threshold", (DL_FUNC) &_SRSim_threshold, 1},
     {"_SRSim_generateReports", (DL_FUNC) &_SRSim_generateReports, 7},
-    {"_SRSim_simulateReportDAG", (DL_FUNC) &_SRSim_simulateReportDAG, 7},
+    {"_SRSim_simulateReportDAG", (DL_FUNC) &_SRSim_simulateReportDAG, 8},
     {"_SRSim_create2x2TablesRcpp", (DL_FUNC) &_SRSim_create2x2TablesRcpp, 4},
     {NULL, NULL, 0}
 };

@@ -638,31 +638,85 @@ Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, a
 }
 
 //' Simulate a single report from a DAG
+//' 
+//' Returns a single report based on a DAG structure. 
+//' 
+//' @param n_drugs The number of drugs in the SR
+//' @param n_events The number of events in the SR
+//' @param id A list with the indices of the drugs and the events 
+//' 
 // [[Rcpp::export]] 
-Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::NumericVector n_parents, int max_n_parents, Rcpp::NumericMatrix betas, bool verbose) {
-  int i, j ; 
+Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, 
+                                      Rcpp::NumericVector id, 
+                                      Rcpp::NumericVector n_parents, 
+                                      int max_n_parents, 
+                                      Rcpp::NumericVector beta0, 
+                                      Rcpp::NumericMatrix betas, 
+                                      bool verbose) {
+  int i, j, index_i, index_j; 
   int n = n_drugs + n_events ; 
+  double logit ; 
 
   // variable to hold the current report 
   Rcpp::NumericVector report(n) ; 
-  Rcpp::LogicalVector drawn(n) ;
   
+  // Keeps track of which indices in the report have already been set
+  Rcpp::LogicalVector drawn(n) ;
   for (i = 0; i < n; i++) {
     drawn[i] = false;  
   }
-
-  int n_drawn = 0 ; 
   
   // go over all nodes that have no parents 
   for (i = 0; i < n; i ++) {
     if (n_parents[i] == 0) {
-       
+      index_i = id[i] ;
+      report[index_i] = rbinom(1, 1, exp(beta0[i]) / (1 + exp(beta0[i])))[0] ; 
+      drawn[index_i] = true ; 
     }
   }
   
-  for (int k = 1; k <= max_n_parents; k++) {
-     
-  }
+  bool parents_drawn, all_drawn = false; 
+  
+  do {
+  
+    // go over the other nodes that have no parents 
+    for (int k = 1; k <= max_n_parents; k++) {
+       for (i = 0; i < n; i ++) {
+          if (n_parents[i] == k) {
+            
+            index_i = id[i] ; 
+            
+            parents_drawn = true ; 
+            
+            logit = beta0[i] ; 
+            
+            for (j = 0; j < n; j ++) {
+              index_j = id[j] ; 
+              if (betas(index_j,index_i) != 0.0) {
+                 if (drawn[index_j]) {
+                   logit -= report[index_j] * betas(index_j,index_i) ; 
+                 } else {
+                   parents_drawn = false ; 
+                   break ;  
+                 }
+              }
+            }
+            
+            if (parents_drawn) {
+              report[index_i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
+              drawn[index_i] = true ; 
+            }
+          }
+       }
+    }
+    
+    all_drawn = true ; 
+    for (i = 0; i < n; i ++) {
+       if (!drawn[i]) {
+          all_drawn = false ;  
+       }
+    }
+  } while (all_drawn) ; 
   
   return(report) ; 
 }
