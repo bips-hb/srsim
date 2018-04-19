@@ -75,14 +75,13 @@ simulateSRDAG <- function(n_reports = 100,
                           valid_reports = TRUE, 
                           verbose = TRUE) { 
   
-  n_drugs <- length(prob_drugs)
+  n_drugs  <- length(prob_drugs)
   n_events <- length(prob_events)
-  n <- n_drugs + n_events
+  n        <- n_drugs + n_events
+  margprob <- c(prob_drugs, prob_events)
+  sr       <- matrix(NA, nrow = n_reports, ncol = n) # matrix that will contain the reports 
   
-  if (verbose) {
-    cat("Creating DAG...") 
-  }
-  
+  if (verbose) {cat("Creating DAG...\n")}
   DAG <- SRSim::simulateDAG(n_drugs = length(prob_drugs), 
                            n_events = length(prob_events), 
                            prob_drugs = prob_drugs, 
@@ -93,17 +92,7 @@ simulateSRDAG <- function(n_reports = 100,
                            n_correlated_pairs = n_correlated_pairs,
                            theta = theta,
                            seed = seed)
-  
-  if (verbose) {
-    cat("DONE Creating DAG...") 
-  }
-  
-  # the marginal probabilities
-  margprob <- c(prob_drugs, prob_events)
-  
-  #sr <- dplyr::as_tibble(data.frame(matrix(NA, nrow = n_reports, ncol = n)))
-  #colnames(sr) <- c(sprintf("drug%d", 1:n_drugs), sprintf("event%d", 1:n_events))
-  sr <- matrix(NA, nrow = n_reports, ncol = n)
+  if (verbose) {cat("DONE Creating DAG...\n")}
   
   # get the nodes and sort them to in degree
   nodes <- DAG$nodes %>% 
@@ -112,36 +101,24 @@ simulateSRDAG <- function(n_reports = 100,
     ) %>% 
     arrange(in_degree) 
   
-  if (verbose) { 
-    pb <- txtProgressBar(min = 0, max = n_reports, initial = 0, char = "=",
-                 style = 3, file = "")
-  }
-  
-  # information needed:
-  # nodes id 
-  # nodes label
-  # no. parents
-  # parents of each node 
-  # betas of each node 
-  
   # matrix with the betas
-  if (verbose) {
-    cat("Obtaining the betas...")
-  }
-  
+  if (verbose) {cat("Obtaining the betas...\n")}
+
   betas <- matrix(log(DAG$adjacency_matrix), n, n)
   betas[betas == -Inf] <- 0
   
   if (verbose) {
-    cat("DONE Obtaining the betas...")
+    cat("DONE Obtaining the betas...\n")
+    cat("Creating the reports...\n")
   }
   
-  if (verbose) {
-    cat("Creating the reports...")
+  # generating the actual reports 
+  if (verbose) { 
+    pb <- txtProgressBar(min = 0, max = n_reports, initial = 0, char = "=",
+                         style = 3, file = "")
   }
   
   n_reports_generated <- 0
-  
   while (n_reports_generated <= n_reports) {
     report <-
       simulateReportDAG(
@@ -155,83 +132,22 @@ simulateSRDAG <- function(n_reports = 100,
         verbose
       )
     if (valid_reports) {
+      # check whether the report is valid 
       if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {
         sr[n_reports_generated,] <- report
-        #sr <- dplyr::add_row(sr, report)
         n_reports_generated <- n_reports_generated + 1
       }
     } else {
       sr[n_reports_generated,] <- report
-      #sr <- dplyr::add_row(sr, report)
       n_reports_generated <- n_reports_generated + 1
     }
     
-    if (verbose) {
-      setTxtProgressBar(pb, n_reports_generated)
-    }
-    
+    if (verbose) {setTxtProgressBar(pb, n_reports_generated)}
   }
   
-  if (verbose) {
-    cat("DONE generating SR data")
-  }
-  
-  return(
-    list( 
-      sr = sr, 
-      prob_drugs = prob_drugs,
-      prob_events = prob_events, 
-      adjecency_matrix = DAG$adjacency_matrix
-    )
-  )
-  
-  return(report)
-  
-  n_reports_generated <- 1
-  
-  while (n_reports_generated <= n_reports) {
+  sr <- as_tibble(sr)
+  colnames(sr) <- c(sprintf("drug%d", 1:n_drugs), sprintf("event%d", 1:n_events))
     
-    report <- rep(NA, n)
-    filled_in <-1:n # keeps track of the binary variables that have not been drawn yet
-    
-    # continue till report is filled
-    while (anyNA(report)) {
-      # go through all indices that are not filled yet
-      for (i in filled_in) {
-        id <- nodes[i,]$id
-        logreg <- nodes[i, ]$beta0
-        # go over the parents
-        for (parent_id in 1:DAG$max_in_degree) {
-          parent_label <- nodes[i, ][[sprintf("parent%d", parent_id)]]
-          if (is.na(parent_label)) {
-            break
-          }
-          beta <- nodes[i, ][[sprintf("beta%d", parent_id)]]
-          parent_id <- nodes[nodes$label == parent_label,]$id
-          logreg <- logreg + beta * report[parent_id]
-        }
-        if (!is.na(logreg)) {
-          report[id] <- rbinom(1, 1, exp(logreg) / (1 + exp(logreg)))
-          filled_in <- filled_in[filled_in != i]
-        }
-      }
-    }
-    
-    if (valid_reports) {
-      if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {
-        sr[n_reports_generated, ] <- report 
-        n_reports_generated <- n_reports_generated + 1  
-      }
-    } else {
-      sr[n_reports_generated, ] <- report 
-      n_reports_generated <- n_reports_generated + 1 
-    }
-    
-    if (verbose) { 
-      setTxtProgressBar(pb, n_reports_generated)
-    }
-  }
-  
   return(
     list( 
       sr = sr, 
