@@ -4,12 +4,12 @@
 \alias{create2x2TablesDAGRcpp}
 \title{Create 2 x 2 Tables based on DAG generated SR data}
 \usage{
-create2x2TablesDAGRcpp(reports, betas, prob_drugs, prob_events)
+create2x2TablesDAGRcpp(reports, oddsratios, prob_drugs, prob_events)
 }
 \arguments{
 \item{reports}{A binary matrix. Each row is a report}
 
-\item{betas}{The matrix with the betas for each pair of variates}
+\item{oddsratios}{The matrix with the odds ratio increase for each pair of variates}
 
 \item{prob_drugs}{A list with the marginal probabilities of the drugs}
 

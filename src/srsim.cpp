@@ -753,7 +753,6 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
   Rcpp::IntegerVector event_id (n_pairs) ;
   Rcpp::NumericVector prob_drug (n_pairs) ;
   Rcpp::NumericVector prob_event (n_pairs) ;
-  Rcpp::NumericVector beta (n_pairs) ;
   Rcpp::NumericVector OR (n_pairs) ;
   Rcpp::LogicalVector associated (n_pairs, false) ; 
   Rcpp::IntegerVector a (n_pairs, 0) ;
@@ -770,7 +769,6 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
       prob_drug[k]      = prob_drugs[i] ; 
       prob_event[k]     = prob_events[j] ; 
       OR[k]             = oddsratios(i, j+n_drugs) ; 
-      beta[k]           = log(OR[k]) ; 
       associated[k]     = (OR[k] != 0.0) ; 
     }
   }
@@ -806,7 +804,6 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
                                   Named("event_id") = event_id, 
                                   Named("prob_drug") = prob_drug, 
                                   Named("prob_event") = prob_event,
-                                  Named("beta") = beta, 
                                   Named("or") = OR,
                                   Named("associated") = associated,
                                   Named("a") = a, 

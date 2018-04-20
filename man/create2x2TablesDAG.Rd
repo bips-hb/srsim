@@ -15,7 +15,6 @@ A data frame where each row represents a 2 x 2 table. The columns represent:
   \item{\code{event_id}}{The ID of the event}
   \item{\code{prob_drug}}{The marginal probability of that drug}
   \item{\code{prob_event}}{The marginal probability of that event}
-  \item{\code{beta}}{The beta value between the drug and event}
   \item{\code{or}}{The increase of the odds ratio when the drug is on the report}
   \item{\code{associated}}{\code{TRUE} is there is a non-zero correlation, \code{FALSE} otherwise}
   \item{\code{a}}{Number of times the drug and event appeared together in a report}
