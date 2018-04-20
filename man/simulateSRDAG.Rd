@@ -55,6 +55,7 @@ simulateSRDAG(n_reports = 100, n_drugs = 10, n_events = 10,
         \item{prob_drugs}{A list with marginal probabilities of the drugs}
         \item{prob_events}{A list with marginal probabilities of the events}
         \item{adjencency_matrix}{The adjecency matrix of the DAG used}
+        \item{nodes}{A tibble with all the information on each node/variate}
 }
 \description{
 \code{simulateSRData} simulates a spontaneous reporting (SR) data set. It allows for setting

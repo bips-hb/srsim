@@ -200,6 +200,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// create2x2TablesDAGRcpp
+Rcpp::DataFrame create2x2TablesDAGRcpp(Rcpp::IntegerMatrix reports, Rcpp::NumericMatrix oddsratios, Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events);
+RcppExport SEXP _SRSim_create2x2TablesDAGRcpp(SEXP reportsSEXP, SEXP oddsratiosSEXP, SEXP prob_drugsSEXP, SEXP prob_eventsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type reports(reportsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type oddsratios(oddsratiosSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_drugs(prob_drugsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_events(prob_eventsSEXP);
+    rcpp_result_gen = Rcpp::wrap(create2x2TablesDAGRcpp(reports, oddsratios, prob_drugs, prob_events));
+    return rcpp_result_gen;
+END_RCPP
+}
 // create2x2TablesRcpp
 Rcpp::DataFrame create2x2TablesRcpp(Rcpp::IntegerMatrix reports, Rcpp::NumericMatrix corrmat, Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events);
 RcppExport SEXP _SRSim_create2x2TablesRcpp(SEXP reportsSEXP, SEXP corrmatSEXP, SEXP prob_drugsSEXP, SEXP prob_eventsSEXP) {
@@ -230,6 +244,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SRSim_threshold", (DL_FUNC) &_SRSim_threshold, 1},
     {"_SRSim_generateReports", (DL_FUNC) &_SRSim_generateReports, 7},
     {"_SRSim_simulateReportDAG", (DL_FUNC) &_SRSim_simulateReportDAG, 8},
+    {"_SRSim_create2x2TablesDAGRcpp", (DL_FUNC) &_SRSim_create2x2TablesDAGRcpp, 4},
     {"_SRSim_create2x2TablesRcpp", (DL_FUNC) &_SRSim_create2x2TablesRcpp, 4},
     {NULL, NULL, 0}
 };

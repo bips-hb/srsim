@@ -2,6 +2,7 @@
 
 export(corr2cov)
 export(create2x2Tables)
+export(create2x2TablesDAG)
 export(generateBlockCorrelationMatrix)
 export(generateBlockCorrelationMatrixRcpp)
 export(generateCorrelationMatrix)

@@ -51,6 +51,7 @@
 #'         \item{prob_drugs}{A list with marginal probabilities of the drugs}
 #'         \item{prob_events}{A list with marginal probabilities of the events}
 #'         \item{adjencency_matrix}{The adjecency matrix of the DAG used}
+#'         \item{nodes}{A tibble with all the information on each node/variate}
 #'
 #' @seealso \code{\link{create2x2Tables}}, 
 #'          \code{\link{generateCorrelationMatrix}}, 
@@ -153,7 +154,8 @@ simulateSRDAG <- function(n_reports = 100,
       sr = sr, 
       prob_drugs = prob_drugs,
       prob_events = prob_events, 
-      adjecency_matrix = DAG$adjacency_matrix
+      adjecency_matrix = DAG$adjacency_matrix,
+      nodes = nodes %>% dplyr::arrange(id)
     )
   )
 }
