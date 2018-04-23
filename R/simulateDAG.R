@@ -60,7 +60,7 @@ simulateDAG <- function(n_drugs = 10,
   beta <- log(theta) # the regression coefficient for the drug-event pairs 
   
   ### create a random DAG for the drugs --------------
-  DAG <- randDAG(n_drugs, exp_degree, method = method, weighted = TRUE, wFUN = function(m){theta_drugs})  
+  DAG <- pcalg::randDAG(n_drugs, exp_degree, method = method, weighted = TRUE, wFUN = function(m){theta_drugs})  
   graph::nodes(DAG) <- drug_labels            # change the node labels for the drugs 
   DAG <- graph::addNode(event_labels, DAG)    # add the event nodes to the DAG
   
