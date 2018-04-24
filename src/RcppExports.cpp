@@ -183,7 +183,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // simulateReportDAG
-Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::NumericVector n_parents, int max_n_parents, Rcpp::NumericVector beta0, Rcpp::NumericMatrix betas, bool verbose);
+Rcpp::IntegerVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector id, Rcpp::IntegerVector n_parents, int max_n_parents, Rcpp::NumericVector beta0, Rcpp::NumericMatrix betas, bool verbose);
 RcppExport SEXP _SRSim_simulateReportDAG(SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP idSEXP, SEXP n_parentsSEXP, SEXP max_n_parentsSEXP, SEXP beta0SEXP, SEXP betasSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -191,7 +191,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type n_drugs(n_drugsSEXP);
     Rcpp::traits::input_parameter< int >::type n_events(n_eventsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type id(idSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type n_parents(n_parentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type n_parents(n_parentsSEXP);
     Rcpp::traits::input_parameter< int >::type max_n_parents(max_n_parentsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type beta0(beta0SEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type betas(betasSEXP);

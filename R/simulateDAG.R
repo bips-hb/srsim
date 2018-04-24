@@ -82,7 +82,7 @@ simulateDAG <- function(n_drugs = 10,
   # a data frame that contains all the data for each node (or variate)
   nodes <- dplyr::tibble(
      label = c(drug_labels, event_labels), 
-     in_degree = as.factor(igraph::degree(DAG, mode = "in")), 
+     in_degree = igraph::degree(DAG, mode = "in"), # as.factor? 
      n_done = 0, # number of incoming edges processed
      margprob = c(prob_drugs, prob_events)
   ) 

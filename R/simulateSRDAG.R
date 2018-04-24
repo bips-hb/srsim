@@ -132,6 +132,7 @@ simulateSRDAG <- function(n_reports = 100,
         betas,
         verbose
       )
+    
     if (valid_reports) {
       # check whether the report is valid 
       if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {

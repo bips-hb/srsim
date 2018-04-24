@@ -646,9 +646,9 @@ Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, a
 //' @param id A list with the indices of the drugs and the events 
 //' 
 // [[Rcpp::export]] 
-Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events, 
+Rcpp::IntegerVector simulateReportDAG(int n_drugs, int n_events, 
                                       Rcpp::NumericVector id, 
-                                      Rcpp::NumericVector n_parents, 
+                                      Rcpp::IntegerVector n_parents, 
                                       int max_n_parents, 
                                       Rcpp::NumericVector beta0, 
                                       Rcpp::NumericMatrix betas, 
@@ -657,24 +657,20 @@ Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events,
   int n = n_drugs + n_events ; 
   double logit ; 
 
-  // variable to hold the current report 
-  Rcpp::NumericVector report(n) ; 
+  // vector to hold the current report 
+  Rcpp::IntegerVector report(n) ; 
   
   // Keeps track of which indices in the report have already been set
-  Rcpp::LogicalVector drawn(n) ;
-  for (i = 0; i < n; i++) {
-    drawn[i] = false;  
-  }
-  
+  Rcpp::LogicalVector drawn(n, false) ;
+
   // go over all nodes that have no parents 
   for (i = 0; i < n; i++) {
     if (n_parents[i] == 0) {
       index_i = id[i] - 1 ;
       report[index_i] = rbinom(1, 1, exp(beta0[i]) / (1 + exp(beta0[i])))[0] ; 
-      drawn[index_i] = true ; 
+      drawn[i] = true ; 
     }
   }
-  
   bool parents_drawn, all_drawn; 
   
   do {
@@ -691,8 +687,8 @@ Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events,
             
             for (j = 0; j < n; j++) {
               index_j = id[j] - 1; 
-              if (betas(index_j,index_i) != 0.0) {
-                 if (drawn[index_j]) {
+              if (fabs(betas(index_j,index_i)) <= 0.0000001) {
+                 if (drawn[j]) {
                    logit -= report[index_j] * betas(index_j,index_i) ; 
                  } else {
                    parents_drawn = false ; 
@@ -703,7 +699,7 @@ Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events,
             
             if (parents_drawn) {
               report[index_i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
-              drawn[index_i] = true ; 
+              drawn[i] = true ; 
             }
           }
        }
@@ -712,9 +708,11 @@ Rcpp::NumericVector simulateReportDAG(int n_drugs, int n_events,
     all_drawn = true ; 
     for (i = 0; i < n; i ++) {
        if (!drawn[i]) {
-          all_drawn = false ;  
+          all_drawn = false ; 
+         break ; 
        }
     }
+    
   } while (all_drawn) ; 
   
   return(report) ; 
