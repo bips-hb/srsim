@@ -84,18 +84,24 @@ simulateDAG <- function(n_drugs = 10,
      label = c(drug_labels, event_labels), 
      in_degree = igraph::degree(DAG, mode = "in"), # as.factor? 
      n_done = 0, # number of incoming edges processed
-     margprob = c(prob_drugs, prob_events)
+     margprob = c(prob_drugs, prob_events),
+     beta0 = log(margprob / (1 - margprob)) 
   ) 
   
-  # add columns for the betas 
-  for (beta_label in sprintf("beta%d", 0:max_in_degree)) {
-    nodes <- tibble::add_column(nodes, !!(beta_label) := 0)
+  # add columns for the betas and the parents
+  for (i in 1:max_in_degree) { 
+    nodes <- tibble::add_column(nodes, !!(sprintf("beta%d",i)) := 0)
+    nodes <- tibble::add_column(nodes, !!(sprintf("parent%d",i)) := NA)
   }
-  
-  # add columns for the parents 
-  for (parent_label in sprintf("parent%d", 1:max_in_degree)) { 
-    nodes <- tibble::add_column(nodes, !!(parent_label) := NA)
-  }
+  # 
+  # for (beta_label in sprintf("beta%d", 1:max_in_degree)) {
+  #   nodes <- tibble::add_column(nodes, !!(beta_label) := 0)
+  # }
+  # 
+  # # add columns for the parents 
+  # for (parent_label in sprintf("parent%d", 1:max_in_degree)) { 
+  #   nodes <- tibble::add_column(nodes, !!(parent_label) := NA)
+  # }
   
   # create also a tibble with all the edges
   edgelist <- igraph::as_edgelist(DAG)
@@ -106,8 +112,8 @@ simulateDAG <- function(n_drugs = 10,
   
   # walk through the edges and add the information to the nodes tibble
   for (i in 1:nrow(edges)) {
-    to   <- edges[i,]$to 
     from <- edges[i,]$from 
+    to   <- edges[i,]$to 
     
     current_parent <- nodes[nodes$label == to,]$n_done + 1 # the current parent that needs to be filled in
     
@@ -127,13 +133,6 @@ simulateDAG <- function(n_drugs = 10,
     # one more done
     nodes[nodes$label == to,]$n_done <- nodes[nodes$label == to,]$n_done + 1
   }
-  
-  ### Set the intercepts, beta0, appropriately 
-  nodes <- nodes %>% dplyr::mutate(
-    beta0 = log(margprob / (1 - margprob))
-  ) %>% dplyr::select(
-    -n_done 
-  )
   
   # walk through the nodes. If there are parents, update the beta0
   for (i in 1:nrow(nodes)) {

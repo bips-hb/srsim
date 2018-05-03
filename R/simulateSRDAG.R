@@ -83,16 +83,18 @@ simulateSRDAG <- function(n_reports = 100,
   sr       <- matrix(NA, nrow = n_reports, ncol = n) # matrix that will contain the reports 
   
   if (verbose) {cat("Creating DAG...\n")}
-  DAG <- SRSim::simulateDAG(n_drugs = length(prob_drugs), 
-                           n_events = length(prob_events), 
-                           prob_drugs = prob_drugs, 
-                           prob_events = prob_events, 
-                           method = method, 
-                           exp_degree = exp_degree, 
-                           theta_drugs = theta_drugs,
-                           n_correlated_pairs = n_correlated_pairs,
-                           theta = theta,
-                           seed = seed)
+  DAG <- SRSim::simulateDAG(
+    n_drugs = n_drugs,
+    n_events = n_events,
+    prob_drugs = prob_drugs,
+    prob_events = prob_events,
+    method = method,
+    exp_degree = exp_degree,
+    theta_drugs = theta_drugs,
+    n_correlated_pairs = n_correlated_pairs,
+    theta = theta,
+    seed = seed
+  )
   if (verbose) {cat("DONE Creating DAG...\n")}
   
   # get the nodes and sort them to in degree
