@@ -96,13 +96,6 @@ simulateSRDAG <- function(n_reports = 100,
     seed = seed
   )
   if (verbose) {cat("DONE Creating DAG...\n")}
-  
-  # get the nodes and sort them to in degree
-  nodes <- DAG$nodes %>%
-    mutate(
-      id = 1:n()
-    ) %>%
-    arrange(in_degree)
 
   # matrix with the betas
   if (verbose) {cat("Obtaining the betas...\n")}
@@ -127,10 +120,7 @@ simulateSRDAG <- function(n_reports = 100,
       simulateReportDAG(
         n_drugs,
         n_events,
-        nodes$id,
-        nodes$in_degree,
-        DAG$max_in_degree,
-        nodes$beta0,
+        DAG$nodes$beta0,
         betas,
         verbose
       )
@@ -159,7 +149,7 @@ simulateSRDAG <- function(n_reports = 100,
       prob_events = prob_events, 
       betas = betas,
       adjecency_matrix = DAG$adjacency_matrix,
-      nodes = nodes %>% dplyr::arrange(id)
+      nodes = DAG$nodes 
     )
   )
 }

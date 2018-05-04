@@ -4,8 +4,7 @@
 \alias{simulateReportDAG}
 \title{Simulate a single report from a DAG}
 \usage{
-simulateReportDAG(n_drugs, n_events, id, n_parents, max_n_parents, beta0, betas,
-  verbose)
+simulateReportDAG(n_drugs, n_events, beta0, betas, verbose)
 }
 \arguments{
 \item{n_drugs}{The number of drugs in the SR}

@@ -18,8 +18,8 @@ plot(res$DAG)
 
 ########################
 
-n_drugs = 10
-n_events = 10
+n_drugs = 100
+n_events = 100
 alpha_drugs = 1.0
 beta_drugs = 5.0
 prob_drugs = rbeta(n_drugs, alpha_drugs, beta_drugs)
@@ -27,7 +27,7 @@ alpha_events = 1.0
 beta_events = 5.0
 prob_events = rbeta(n_events, alpha_events, beta_events)
 
-n_reports <- 10000
+n_reports <- 100000
 
 res <- simulateSRDAG(
   n_reports = n_reports,
@@ -45,7 +45,7 @@ res <- simulateSRDAG(
 
 sr <- res$sr
 
-hist(c(prob_drugs, prob_events) - colSums(sr) / n_reports, breaks=100)
+hist(c(prob_drugs, prob_events) - colSums(sr) / n_reports, breaks=20)
 
 sort(c(prob_drugs, prob_events) - colSums(sr) / n_reports)
 
