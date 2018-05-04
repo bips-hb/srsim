@@ -85,7 +85,7 @@ simulateDAG <- function(n_drugs = 10,
      in_degree = igraph::degree(DAG, mode = "in"), # as.factor? 
      n_done = 0, # number of incoming edges processed
      margprob = c(prob_drugs, prob_events),
-     beta0 = log(margprob / (1 - margprob)) 
+     beta0 = log(margprob / (1 - margprob))  # the intercept when there are no parents  
   ) 
   
   # add columns for the betas and the parents
@@ -93,15 +93,6 @@ simulateDAG <- function(n_drugs = 10,
     nodes <- tibble::add_column(nodes, !!(sprintf("beta%d",i)) := 0)
     nodes <- tibble::add_column(nodes, !!(sprintf("parent%d",i)) := NA)
   }
-  # 
-  # for (beta_label in sprintf("beta%d", 1:max_in_degree)) {
-  #   nodes <- tibble::add_column(nodes, !!(beta_label) := 0)
-  # }
-  # 
-  # # add columns for the parents 
-  # for (parent_label in sprintf("parent%d", 1:max_in_degree)) { 
-  #   nodes <- tibble::add_column(nodes, !!(parent_label) := NA)
-  # }
   
   # create also a tibble with all the edges
   edgelist <- igraph::as_edgelist(DAG)
@@ -139,17 +130,14 @@ simulateDAG <- function(n_drugs = 10,
     n_parents <- nodes[i,]$in_degree
     # if there are parents, iterate over them
     if (n_parents != 0) {
-      for (current_parent in 1:max_in_degree) { 
+      for (current_parent in 1:n_parents) { 
         beta_label   <- sprintf("beta%d", current_parent)
         parent_label <- sprintf("parent%d", current_parent)
         
         parent <- nodes[i,][[parent_label]]
-        if (is.na(parent)) {
-          break  
-        }
-        
+ 
         # get the beta and the marginal probability of the parent
-        beta_parent <- nodes[nodes$label == parent,][[beta_label]] 
+        beta_parent     <- nodes[i,][[beta_label]]  # TODO mistake was here, same in C code? 
         margprob_parent <- nodes[nodes$label == parent,]$margprob
         
         # simply subtract their product to get the appropriate beta0

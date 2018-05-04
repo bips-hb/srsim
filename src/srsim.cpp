@@ -658,63 +658,106 @@ Rcpp::IntegerVector simulateReportDAG(int n_drugs, int n_events,
   double logit ; 
 
   // vector to hold the current report 
-  Rcpp::IntegerVector report(n) ; 
+  Rcpp::IntegerVector report(n, -1) ; 
   
   // Keeps track of which indices in the report have already been set
   Rcpp::LogicalVector drawn(n, false) ;
 
-  // go over all nodes that have no parents 
-  for (i = 0; i < n; i++) {
-    if (n_parents[i] == 0) {
-      index_i = id[i] - 1 ;
-      report[index_i] = rbinom(1, 1, exp(beta0[i]) / (1 + exp(beta0[i])))[0] ; 
-      drawn[i] = true ; 
-    }
-  }
-  bool parents_drawn, all_drawn; 
+  bool all_drawn ; // true only when the report is completely filled
+  bool parents_drawn ; 
   
   do {
-  
-    // go over the other nodes that have parents 
-    for (int no_parents = 1; no_parents <= max_n_parents; no_parents++) {
-       for (i = 0; i < n; i ++) {
-          if (n_parents[i] == no_parents) {
-            index_i = id[i] - 1; // the index in the report vector
-            
-            parents_drawn = true ; 
-            
-            logit = beta0[i] ; 
-            
-            for (j = 0; j < n; j++) {
-              index_j = id[j] - 1; 
-              if (fabs(betas(index_j,index_i)) <= 0.0000001) {
-                 if (drawn[j]) {
-                   logit -= report[index_j] * betas(index_j,index_i) ; 
-                 } else {
-                   parents_drawn = false ; 
-                   break ;  
-                 }
-              }
-            }
-            
-            if (parents_drawn) {
-              report[index_i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
-              drawn[i] = true ; 
+    // go over all nodes
+    for (i = 0; i < n; i++) {
+      if (!drawn[i]) { // check whether the node is already drawn
+        index_i = id[i] - 1 ; 
+      
+        logit = beta0[i] ; 
+      
+        parents_drawn = true ; 
+        for (j = 0; j < n; j++) {
+          index_j = id[j] - 1; 
+          if (fabs(betas(index_j, index_i)) > 0.00001) { // a parent 
+            if (drawn[j]) {
+                logit += betas(index_j, index_i) * report[index_j] ; 
+            } else {
+                parents_drawn = false ; 
+                break ; 
             }
           }
-       }
+        }
+      
+        if (parents_drawn) { 
+          report[index_i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
+          drawn[i] = true ; 
+        } 
+      }
     }
     
+    // check whether all variates are drawn
     all_drawn = true ; 
-    for (i = 0; i < n; i ++) {
-       if (!drawn[i]) {
-          all_drawn = false ; 
-         break ; 
-       }
+    for (i = 0; i < n; i++) {
+      if (!drawn[i]) { 
+        all_drawn = false ;
+        Rcout << i << "\t" << n_parents[i] << "\n" ; 
+        //break ; 
+      }
     }
-    
-  } while (all_drawn) ; 
+  } while (!all_drawn) ; 
   
+  // // go over all nodes that have no parents 
+  // for (i = 0; i < n; i++) {
+  //   if (n_parents[i] == 0) {
+  //     index_i = id[i] - 1 ;
+  //     report[index_i] = rbinom(1, 1, exp(beta0[i]) / (1 + exp(beta0[i])))[0] ; 
+  //     drawn[i] = true ; 
+  //   }
+  // }
+  // bool parents_drawn, all_drawn; 
+  // 
+  // do {
+  //   // go over the other nodes that have parents 
+  //   for (int no_parents = 1; no_parents <= max_n_parents; no_parents++) {
+  //      for (i = 0; i < n; i ++) {
+  //         if (n_parents[i] == no_parents) {
+  //           index_i = id[i] - 1; // the index in the report vector
+  //           
+  //           parents_drawn = true ; 
+  //           
+  //           logit = beta0[i] ; 
+  //           
+  //           for (j = 0; j < n; j++) {
+  //             index_j = id[j] - 1; 
+  //             if (fabs(betas(index_i,index_j)) <= 0.0000001) {
+  //                if (drawn[j]) {
+  //                  logit -= report[index_j] * betas(index_i,index_j) ; 
+  //                } else {
+  //                  parents_drawn = false ; 
+  //                  break ;  
+  //                }
+  //             }
+  //           }
+  //           
+  //           Rcout << no_parents << "\t" << id[i] << "\t" << id[j] << "\t" << exp(logit) / (1 + exp(logit)) << "\n";
+  //           if (parents_drawn) {
+  //              
+  //             report[index_i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
+  //             drawn[i] = true ; 
+  //           }
+  //         }
+  //      }
+  //   }
+  //   
+  //   all_drawn = true ; 
+  //   for (i = 0; i < n; i ++) {
+  //      if (!drawn[i]) {
+  //         all_drawn = false ; 
+  //        break ; 
+  //      }
+  //   }
+  //   
+  // } while (all_drawn) ; 
+  // 
   return(report) ; 
 }
 
