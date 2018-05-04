@@ -751,7 +751,10 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
       prob_drug[k]      = prob_drugs[i] ; 
       prob_event[k]     = prob_events[j] ; 
       OR[k]             = oddsratios(i, j+n_drugs) ; 
-      associated[k]     = (OR[k] != 0.0) ; 
+      if (fabs(OR[k]) < 0.00001) { 
+        OR[k] = 1.0 ;  
+      }
+      associated[k]     = (OR[k] != 1.0) ; 
     }
   }
   
