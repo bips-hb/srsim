@@ -182,6 +182,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// simulateReport
+Rcpp::IntegerVector simulateReport(int n_drugs, int n_events, Rcpp::IntegerVector n_parents, Rcpp::NumericVector beta0, Rcpp::NumericVector beta1, Rcpp::IntegerVector parent_id, bool verbose);
+RcppExport SEXP _SRSim_simulateReport(SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP n_parentsSEXP, SEXP beta0SEXP, SEXP beta1SEXP, SEXP parent_idSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_drugs(n_drugsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_events(n_eventsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type n_parents(n_parentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type beta1(beta1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type parent_id(parent_idSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(simulateReport(n_drugs, n_events, n_parents, beta0, beta1, parent_id, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // simulateReportDAG
 Rcpp::IntegerVector simulateReportDAG(int n_drugs, int n_events, Rcpp::NumericVector beta0, Rcpp::NumericMatrix betas, bool verbose);
 RcppExport SEXP _SRSim_simulateReportDAG(SEXP n_drugsSEXP, SEXP n_eventsSEXP, SEXP beta0SEXP, SEXP betasSEXP, SEXP verboseSEXP) {
@@ -198,16 +215,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // create2x2TablesDAGRcpp
-Rcpp::DataFrame create2x2TablesDAGRcpp(Rcpp::IntegerMatrix reports, Rcpp::NumericMatrix oddsratios, Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events);
-RcppExport SEXP _SRSim_create2x2TablesDAGRcpp(SEXP reportsSEXP, SEXP oddsratiosSEXP, SEXP prob_drugsSEXP, SEXP prob_eventsSEXP) {
+Rcpp::DataFrame create2x2TablesDAGRcpp(Rcpp::IntegerMatrix reports, Rcpp::NumericVector prob_drugs, Rcpp::NumericVector prob_events, Rcpp::IntegerVector n_parents, Rcpp::IntegerVector parent_id, Rcpp::NumericVector beta1);
+RcppExport SEXP _SRSim_create2x2TablesDAGRcpp(SEXP reportsSEXP, SEXP prob_drugsSEXP, SEXP prob_eventsSEXP, SEXP n_parentsSEXP, SEXP parent_idSEXP, SEXP beta1SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type reports(reportsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type oddsratios(oddsratiosSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_drugs(prob_drugsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type prob_events(prob_eventsSEXP);
-    rcpp_result_gen = Rcpp::wrap(create2x2TablesDAGRcpp(reports, oddsratios, prob_drugs, prob_events));
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type n_parents(n_parentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type parent_id(parent_idSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type beta1(beta1SEXP);
+    rcpp_result_gen = Rcpp::wrap(create2x2TablesDAGRcpp(reports, prob_drugs, prob_events, n_parents, parent_id, beta1));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -240,8 +259,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SRSim_mvrnormArma", (DL_FUNC) &_SRSim_mvrnormArma, 4},
     {"_SRSim_threshold", (DL_FUNC) &_SRSim_threshold, 1},
     {"_SRSim_generateReports", (DL_FUNC) &_SRSim_generateReports, 7},
+    {"_SRSim_simulateReport", (DL_FUNC) &_SRSim_simulateReport, 7},
     {"_SRSim_simulateReportDAG", (DL_FUNC) &_SRSim_simulateReportDAG, 5},
-    {"_SRSim_create2x2TablesDAGRcpp", (DL_FUNC) &_SRSim_create2x2TablesDAGRcpp, 4},
+    {"_SRSim_create2x2TablesDAGRcpp", (DL_FUNC) &_SRSim_create2x2TablesDAGRcpp, 6},
     {"_SRSim_create2x2TablesRcpp", (DL_FUNC) &_SRSim_create2x2TablesRcpp, 4},
     {NULL, NULL, 0}
 };

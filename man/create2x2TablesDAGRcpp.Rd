@@ -4,18 +4,19 @@
 \alias{create2x2TablesDAGRcpp}
 \title{Create 2 x 2 Tables based on DAG generated SR data}
 \usage{
-create2x2TablesDAGRcpp(reports, oddsratios, prob_drugs, prob_events)
+create2x2TablesDAGRcpp(reports, prob_drugs, prob_events, n_parents, parent_id,
+  beta1)
 }
 \arguments{
 \item{reports}{A binary matrix. Each row is a report}
-
-\item{oddsratios}{The matrix with the odds ratio increase for each pair of variates}
 
 \item{prob_drugs}{A list with the marginal probabilities of the drugs}
 
 \item{prob_events}{A list with the marginal probabilities of the events}
 
 \item{n_parents}{List with the number of parents for each node}
+
+\item{oddsratios}{The matrix with the odds ratio increase for each pair of variates}
 }
 \value{
 A dataframe. A description of the columns can be found in the commentary

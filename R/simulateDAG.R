@@ -101,10 +101,19 @@ simulateDAG <- function(n_drugs = 10,
     to = edgelist[,2]
   )
   
+  nodes_alt <- list()
+  for (i in 1:nrow(nodes)) { 
+    node <- nodes[i, ]
+    nodes_alt[[node$label]]$n_parents <- node$in_degree 
+    nodes_alt[[node$label]]$margprob <- node$margprob 
+  }
+  
   # walk through the edges and add the information to the nodes tibble
   for (i in 1:nrow(edges)) {
     from <- edges[i,]$from 
     to   <- edges[i,]$to 
+    
+    nodes_alt[[to]]$parents <- c(nodes_alt[[to]]$parents, from) 
     
     current_parent <- nodes[nodes$label == to,]$n_done + 1 # the current parent that needs to be filled in
     
@@ -117,8 +126,10 @@ simulateDAG <- function(n_drugs = 10,
     # add the appropriate beta value for this edge
     if (startsWith(to, "drug")) { 
       nodes[nodes$label == to,][[beta_label]] <- beta_drugs
+      nodes_alt[[to]]$betas <- c(nodes_alt[[to]]$betas, beta_drugs)
     } else { 
       nodes[nodes$label == to,][[beta_label]] <- beta
+      nodes_alt[[to]]$betas <- c(nodes_alt[[to]]$betas, beta)
     }
     
     # one more done
@@ -130,6 +141,9 @@ simulateDAG <- function(n_drugs = 10,
     n_parents <- nodes[i,]$in_degree
     # if there are parents, iterate over them
     if (n_parents != 0) {
+      # igraph::induced_subgraph(DAG, parents, impl = c("auto", "copy_and_delete",
+                                     #        "create_from_scratch"))
+      
       for (current_parent in 1:n_parents) { 
         beta_label   <- sprintf("beta%d", current_parent)
         parent_label <- sprintf("parent%d", current_parent)
@@ -149,6 +163,7 @@ simulateDAG <- function(n_drugs = 10,
   return(
     list(
       nodes = nodes,
+      nodes_alt = nodes_alt, 
       DAG = DAG, 
       prob_drugs = prob_drugs,
       prob_events = prob_events,

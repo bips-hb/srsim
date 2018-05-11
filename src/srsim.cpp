@@ -637,6 +637,64 @@ Rcpp::LogicalMatrix generateReports (int n_reports, Rcpp::NumericVector means, a
   }
 }
 
+// [[Rcpp::export]]
+Rcpp::IntegerVector simulateReport(int n_drugs, int n_events,
+                                         Rcpp::IntegerVector n_parents,
+                                         Rcpp::NumericVector beta0, 
+                                         Rcpp::NumericVector beta1, 
+                                         Rcpp::IntegerVector parent_id, 
+                                         bool verbose) {
+  
+  int i; 
+  int n = n_drugs + n_events ; 
+  double logit ; 
+  
+  // vector to hold the current report 
+  Rcpp::IntegerVector report(n, -1) ; 
+  
+  // Keeps track of which indices in the report have already been set
+  Rcpp::LogicalVector drawn(n, false) ;
+  
+  bool all_drawn ; // true only when the report is completely filled
+  bool parent_drawn ; 
+  
+  do {
+    // go over all nodes
+    for (i = 0; i < n; i++) {
+      if (!drawn[i]) { // check whether the node is already drawn
+        
+        logit = beta0[i] ; 
+        
+        parent_drawn = true ;
+        if (n_parents[i] == 1) { 
+          if (drawn[parent_id[i]-1]) {
+            logit += beta1[i] * report[parent_id[i]-1] ; 
+          } else { 
+            parent_drawn = false ;  
+          }
+        }
+        
+        if (parent_drawn) { 
+          report[i] = rbinom(1, 1, exp(logit) / (1 + exp(logit)))[0] ;  
+          drawn[i] = true ; 
+        } 
+      }
+    }
+    
+    // check whether all variates are drawn
+    all_drawn = true ; 
+    for (i = 0; i < n; i++) {
+      if (!drawn[i]) { 
+        all_drawn = false ;
+        break ; 
+      }
+    }
+  } while (!all_drawn) ; 
+  
+  return(report) ; 
+  
+}
+
 //' Simulate a single report from a DAG
 //' 
 //' Returns a single report based on a DAG structure. 
@@ -722,9 +780,11 @@ Rcpp::IntegerVector simulateReportDAG(int n_drugs, int n_events,
 //' @seealso \code{\link{create2x2TablesDAG}}
 // [[Rcpp::export]]
 Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports, 
-                                        Rcpp::NumericMatrix oddsratios,
                                         Rcpp::NumericVector prob_drugs, 
-                                        Rcpp::NumericVector prob_events) {
+                                        Rcpp::NumericVector prob_events,
+                                        Rcpp::IntegerVector n_parents,
+                                        Rcpp::IntegerVector parent_id,
+                                        Rcpp::NumericVector beta1) {
   int n_drugs = prob_drugs.size() ; 
   int n_events = prob_events.size() ; 
   int n_pairs = n_drugs * n_events ; 
@@ -735,7 +795,7 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
   Rcpp::IntegerVector event_id (n_pairs) ;
   Rcpp::NumericVector prob_drug (n_pairs) ;
   Rcpp::NumericVector prob_event (n_pairs) ;
-  Rcpp::NumericVector OR (n_pairs) ;
+  Rcpp::NumericVector OR (n_pairs, 1.0) ;
   Rcpp::LogicalVector associated (n_pairs, false) ; 
   Rcpp::IntegerVector a (n_pairs, 0) ;
   Rcpp::IntegerVector b (n_pairs, 0) ;
@@ -750,11 +810,13 @@ Rcpp::DataFrame create2x2TablesDAGRcpp (Rcpp::IntegerMatrix reports,
       event_id[k]       = j+1 ; 
       prob_drug[k]      = prob_drugs[i] ; 
       prob_event[k]     = prob_events[j] ; 
-      OR[k]             = oddsratios(i, j+n_drugs) ; 
-      if (fabs(OR[k]) < 0.00001) { 
-        OR[k] = 1.0 ;  
+      
+      if (n_parents[j + n_drugs] == 1) {
+        if (i == (parent_id[j + n_drugs]-1)) {
+          OR[k] = exp(beta1[j + n_drugs]) ; 
+          associated[k] = true ; 
+        }
       }
-      associated[k]     = (OR[k] != 1.0) ; 
     }
   }
   

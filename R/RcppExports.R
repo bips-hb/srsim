@@ -261,6 +261,10 @@ generateReports <- function(n_reports, means, L, valid_reports, n_drugs, n_event
     .Call('_SRSim_generateReports', PACKAGE = 'SRSim', n_reports, means, L, valid_reports, n_drugs, n_events, verbose)
 }
 
+simulateReport <- function(n_drugs, n_events, n_parents, beta0, beta1, parent_id, verbose) {
+    .Call('_SRSim_simulateReport', PACKAGE = 'SRSim', n_drugs, n_events, n_parents, beta0, beta1, parent_id, verbose)
+}
+
 #' Simulate a single report from a DAG
 #' 
 #' Returns a single report based on a DAG structure. 
@@ -290,8 +294,8 @@ simulateReportDAG <- function(n_drugs, n_events, beta0, betas, verbose) {
 #'         for the function \code{\link{create2x2TablesDAG}}
 #' 
 #' @seealso \code{\link{create2x2TablesDAG}}
-create2x2TablesDAGRcpp <- function(reports, oddsratios, prob_drugs, prob_events) {
-    .Call('_SRSim_create2x2TablesDAGRcpp', PACKAGE = 'SRSim', reports, oddsratios, prob_drugs, prob_events)
+create2x2TablesDAGRcpp <- function(reports, prob_drugs, prob_events, n_parents, parent_id, beta1) {
+    .Call('_SRSim_create2x2TablesDAGRcpp', PACKAGE = 'SRSim', reports, prob_drugs, prob_events, n_parents, parent_id, beta1)
 }
 
 #' Create 2 x 2 Tables 
