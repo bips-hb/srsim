@@ -128,13 +128,13 @@ simulateSR <- function(n_reports = 100,
       if (length(theta_drugs) == 1) { 
         nodes[nodes$id == to,]$beta1 <- log(theta_drugs)
       } else {
-        nodes[nodes$id == to,]$beta1 <- log(max(0, rnorm(1, theta_drugs[1], theta_drugs[2])))
+        nodes[nodes$id == to,]$beta1 <- log(max(1, rnorm(1, theta_drugs[1], theta_drugs[2])))
       }
     } else { 
       if (length(theta) == 1) { 
         nodes[nodes$id == to,]$beta1 <- log(theta)
       } else {
-        nodes[nodes$id == to,]$beta1 <- log(max(0, rnorm(1, theta[1], theta[2]))) 
+        nodes[nodes$id == to,]$beta1 <- log(max(1, rnorm(1, theta[1], theta[2]))) 
       }
     }
   }

@@ -140,7 +140,7 @@ or_drug_bystanders = c()
 or_bystanders_events = c()
 
 n_innocent_bystanders <- 5
-theta <- c(5,2)
+theta <- c(1.25,1)
 theta_drugs <- 1000
 
 drugs <- sprintf("drug%d", 1:n_innocent_bystanders)
