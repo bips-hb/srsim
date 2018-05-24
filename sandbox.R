@@ -133,77 +133,99 @@ d = sum((1 - res$sr$drug7) * (1 - res$sr$event5))
 
 
 
-rep = 20
+rep <- 10
 
-or_drug_events = c()
-or_drug_bystanders = c()
-or_bystanders_events = c()
+n_reports <- 10000
+n_drugs <- 100
+n_events <- 100
+n_innocent_bystanders <- 50
+theta_drugs <- 100
+n_correlated_pairs  <- 25
+theta <- c(10, 1)
 
-n_innocent_bystanders <- 5
-theta <- c(1.25,1)
-theta_drugs <- 1000
+# initialize
+or_drug_events <- c() 
+or_drug_bystanders <- c()
+or_bystanders_events <- c()
 
 drugs <- sprintf("drug%d", 1:n_innocent_bystanders)
-bystanders <- sprintf("drug%d", (n_innocent_bystanders+1):10)
+bystanders <- sprintf("drug%d", (n_innocent_bystanders+1):n_drugs)
 
-
+estimateOR <- function(col1, col2) { 
+  n <- length(col1)
+  
+  
+  a = sum(col1 * col2)
+  b = sum((1 - col1) * col2)
+  c = sum(col1 * (1 - col2))
+  d = sum((1 - col1) * (1 - col2))
+  
+  (a * d) / (b * c)
+}
 
 for (i in 1:rep) { 
   
   tryCatch({
     res <-
       SRSim::simulateSR(
-        n_reports = 10000,
-        beta_drugs = 20, 
-        beta_events = 20,
+        n_reports = n_reports,
+        n_drugs = n_drugs,
+        n_events = n_events,
         n_innocent_bystanders = n_innocent_bystanders,
-        valid_reports = F,
         theta_drugs = theta_drugs,
-        theta = theta
+        theta = theta, 
+        n_correlated_pairs = n_correlated_pairs, 
+        valid_reports = T
       )
     
-    e <- res$nodes %>% filter(startsWith(label,"event"), parent_id != -1)
-    events <- e$label 
-    drug_events <- sprintf("drug%d", e$parent_id)
+    tables <- create2x2TablesDAG(res) %>% mutate(
+      est_or = (a * d) / (b * c), 
+      bystander = FALSE
+    )
     
-    # or drug events  
-    for (i in 1:nrow(e)) {
-      event <- e[i,]
-      drug <- sprintf("drug%d", event$parent_id)
-      
-      bystander <- sprintf("drug%d", event$parent_id + 5)
-      
-      a = sum(res$sr[[drug]] * res$sr[[event$label]])
-      b = sum((1 - res$sr[[drug]]) * res$sr[[event$label]])
-      c = sum(res$sr[[drug]] * (1 - res$sr[[event$label]]))
-      d = sum((1 - res$sr[[drug]]) * (1 - res$sr[[event$label]]))
-      
-      
-      or_drug_events <- c(or_drug_events, (a * d) / (b * c))
-      
-      a = sum(res$sr[[bystander]] * res$sr[[event$label]])
-      b = sum((1 - res$sr[[bystander]]) * res$sr[[event$label]])
-      c = sum(res$sr[[bystander]] * (1 - res$sr[[event$label]]))
-      d = sum((1 - res$sr[[bystander]]) * (1 - res$sr[[event$label]]))
-      
-      or_bystanders_events <- c(or_bystanders_events, (a * d) / (b * c)) 
+    if (n_innocent_bystanders > 0) { 
+      for (i in 1:nrow(tables)) { 
+        table <- tables[i,]
+        if (table$drug_id <= n_innocent_bystanders & table$associated) { 
+          bystander_id <- table$drug_id + (n_drugs / 2) 
+          index <- (bystander_id - 1) * n_events + table$event_id
+          tables[index,]$bystander <- TRUE 
+        }
+      }
     }
     
-    # or drug bystanders
-    for (k in 1:5) {
-      l = k + 5
-      i = sprintf("drug%d", k)
-      j = sprintf("drug%d", l)
-      a = sum(res$sr[[i]] * res$sr[[j]])
-      b = sum((1 - res$sr[[i]]) * res$sr[[j]])
-      c = sum(res$sr[[i]] * (1 - res$sr[[j]]))
-      d = sum((1 - res$sr[[i]]) * (1 - res$sr[[j]]))
-      
-      or_drug_bystanders <- c(or_drug_bystanders, (a * d) / (b * c))
-    }
+    tables <- tables %>% mutate(
+      class = ifelse(associated, 'associated', ifelse(bystander, 'bystander', 'not associated')) 
+    )
+    
+    # e <- res$nodes %>% dplyr::filter(startsWith(label,"event"), parent_id != -1)
+    # events <- e$label 
+    # 
+    # # estimate OR drug events that are associated  
+    # for (i in 1:nrow(e)) {
+    #   event <- e[i,]
+    #   drug <- sprintf("drug%d", event$parent_id)
+    #   
+    #   or_drug_events <- c(or_drug_events, estimateOR(res$sr[[drug]], res$sr[[event$label]]))
+    #   
+    #   # get the bystander (if it exists)
+    #   if (n_innocent_bystanders <= event$parent_id) {
+    #     bystander <- sprintf("drug%d", event$parent_id + (n_drugs / 2))
+    #     or_bystanders_events <- c(or_bystanders_events, estimateOR(res$sr[[bystander]], res$sr[[event$label]])) 
+    #   }
+    # }
+    # 
+    # # estimate OR between drugs and their bystanders
+    # if (n_innocent_bystanders > 0) {
+    #   for (k in 1:n_innocent_bystanders) {
+    #     l = k + (n_drugs / 2)
+    #     drug = sprintf("drug%d", k)
+    #     bystander = sprintf("drug%d", l)
+    #     
+    #     or_drug_bystanders <- c(or_drug_bystanders, estimateOR(res$sr[[drug]], res$sr[[bystander]]))
+    #   }
+    # }
   }, error=function(e){})
-  
- 
   
 }
 
@@ -213,9 +235,3 @@ hist(or_bystanders_events, breaks = 30)
 
 hist(or_drug_events, breaks = 30, col=rgb(1,0,0,0.5))
 hist(or_bystanders_events, breaks = 30, col=rgb(0,0,1,0.5), add = T)
-
-
-
-
-
-
