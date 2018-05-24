@@ -135,11 +135,11 @@ d = sum((1 - res$sr$drug7) * (1 - res$sr$event5))
 
 rep <- 10
 
-n_reports <- 50000
+n_reports <- 1
 n_drugs <- 500
 n_events <- 500
 n_innocent_bystanders <- 250
-theta_drugs <- 100000
+theta_drugs <- 10000
 n_correlated_pairs  <- 250
 theta <- c(10, 1)
 

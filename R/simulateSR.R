@@ -150,9 +150,17 @@ simulateSR <- function(n_reports = 100,
     node <- nodes[i, ]
     if (node$in_degree == 1) { 
       # optimize the beta0 
-      margprob_parent <- nodes[nodes$id == node$parent_id,]$margprob
-      res <- optim(node$beta0, f_beta0, method = "L-BFGS-B", margprob = node$margprob, beta1 = node$beta1, margprob_parent = margprob_parent)
-      nodes[i,]$beta0 <- res$par
+      margprob_parent <- nodes[nodes$id == node$parent_id, ]$margprob
+      res <-
+        optim(
+          node$beta0,
+          f_beta0,
+          method = "L-BFGS-B",
+          margprob = node$margprob,
+          beta1 = node$beta1,
+          margprob_parent = margprob_parent
+        )
+      nodes[i, ]$beta0 <- res$par
     }
   }
   
