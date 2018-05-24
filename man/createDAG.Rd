@@ -2,56 +2,24 @@
 % Please edit documentation in R/createDAG.R
 \name{createDAG}
 \alias{createDAG}
-\title{\code{simulateDAG} creates a random directed acyclic graph that can be used
-for simulating SR data}
+\title{Directed Acyclic Graph for SR Data}
 \usage{
 createDAG(n_drugs = 10, n_events = 10, n_innocent_bystanders = 5,
-  n_correlated_pairs = 2, seed = NULL, verbose = TRUE)
+  n_correlated_pairs = 2)
 }
 \arguments{
 \item{n_drugs}{Number of drugs (Default: 10)}
 
 \item{n_events}{Number of adverse drug events (Default: 10)}
 
-\item{n_correlated_pairs}{Number of drug-event pairs that will exhibit a nonzero correlation (Default: 2)}
+\item{n_innocent_bystanders}{Number of innocent bystanders (Default: 5)}
 
-\item{seed}{The seed used by the RNG (Default: automatically set)}
-
-\item{verbose}{Verbosity (Default: \code{TRUE})}
-
-\item{alpha_drugs}{Alpha parameter for the drug marginal probabilities (Default: 1.0)}
-
-\item{beta_drugs}{Beta parameter for the drug marginal probabilities (Default: 5.0)}
-
-\item{prob_drugs}{Specific array with the marginal probability of the drugs (Default: Beta distribution)}
-
-\item{alpha_events}{Alpha parameter for the event marginal probabilities (Default: 1.0)}
-
-\item{beta_events}{Beta parameter for the event marginal probabilities (Default: 5.0)}
-
-\item{prob_events}{Specific array with the marginal probability of the events (Default: Beta distribution)}
-
-\item{method}{The method used for generating the random DAG for the drugs (Default: \code{'er'}, Erdos-Renyi graph)}
-
-\item{exp_degree}{Average degree between the drugs in the random DAG (Default: 3)}
-
-\item{theta_drugs}{The increase in odds-ratio when there is a connection between two drugs (Default: 1.5)}
-
-\item{theta}{Increase in odds-ratio when there is an edge going from a drug to an event (Default: 2.0)}
+\item{n_correlated_pairs}{Number of drug-event pairs that will be associated (Default: 2)}
 }
 \value{
-\item{nodes}{A tibble containing all the information on each node/variate}
-        \item{DAG}{The DAG as an \code{igraph} object} 
-        \item{prob_drugs}{A list with marginal probabilities of the drugs}
-        \item{prob_events}{A list with marginal probabilities of the events}
-        \item{max_in_degree}{The maximal in-degree found in the graph \code{DAG}}
-        \item{adjacency_matrix}{The adjencency matrix for the graph \code{DAG}}
+The DAG as an \code{igraph} object
 }
 \description{
-\code{simulateDAG} creates a random directed acyclic graph that can be used
+\code{createDAG} creates a directed acyclic graph that can be used
 for simulating SR data
-}
-\seealso{
-\code{\link{create2x2Tables}}, 
-         \code{\link{validReport}}
 }

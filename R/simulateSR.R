@@ -75,6 +75,12 @@ simulateSR <- function(n_reports = 100,
                           valid_reports = TRUE, 
                           verbose = TRUE) { 
   
+  
+  # set the seed
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  
   n_drugs  <- length(prob_drugs)
   n_events <- length(prob_events)
   n        <- n_drugs + n_events
@@ -89,8 +95,7 @@ simulateSR <- function(n_reports = 100,
     n_drugs = n_drugs,
     n_events = n_events,
     n_innocent_bystanders = n_innocent_bystanders,
-    n_correlated_pairs = n_correlated_pairs,
-    seed = seed
+    n_correlated_pairs = n_correlated_pairs
   )
   if (verbose) {cat("DONE Creating DAG...\n")}
 

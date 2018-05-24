@@ -135,13 +135,72 @@ d = sum((1 - res$sr$drug7) * (1 - res$sr$event5))
 
 rep <- 10
 
-n_reports <- 10000
-n_drugs <- 100
-n_events <- 100
-n_innocent_bystanders <- 50
-theta_drugs <- 100
-n_correlated_pairs  <- 25
+n_reports <- 50000
+n_drugs <- 500
+n_events <- 500
+n_innocent_bystanders <- 250
+theta_drugs <- 100000
+n_correlated_pairs  <- 250
 theta <- c(10, 1)
+
+
+res <-
+  SRSim::simulateSR(
+    n_reports = n_reports,
+    n_drugs = n_drugs,
+    n_events = n_events,
+    n_innocent_bystanders = n_innocent_bystanders,
+    theta_drugs = theta_drugs,
+    theta = theta, 
+    n_correlated_pairs = n_correlated_pairs, 
+    valid_reports = T
+  )
+
+tables <- create2x2TablesDAG(res) %>% mutate(
+  est_or = (a * d) / (b * c), 
+  bystander = FALSE
+)
+
+if (n_innocent_bystanders > 0) { 
+  for (i in 1:nrow(tables)) { 
+    table <- tables[i,]
+    if (table$drug_id <= n_innocent_bystanders & table$associated) { 
+      bystander_id <- table$drug_id + (n_drugs / 2) 
+      index <- (bystander_id - 1) * n_events + table$event_id
+      tables[index,]$bystander <- TRUE 
+    }
+  }
+}
+
+tables <- tables %>% mutate(
+  class = ifelse(associated, 'associated', ifelse(bystander, 'bystander', 'not associated')) 
+)
+
+# Density plots
+ggplot(tables %>% filter(class != 'not associated'), aes(x=est_or, colour=class)) + geom_density()
+
+# Density plots
+ggplot(tables %>% filter(class != 'not associated'), aes(x=est_or, fill = class)) + geom_histogram()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # initialize
 or_drug_events <- c() 
@@ -150,6 +209,10 @@ or_bystanders_events <- c()
 
 drugs <- sprintf("drug%d", 1:n_innocent_bystanders)
 bystanders <- sprintf("drug%d", (n_innocent_bystanders+1):n_drugs)
+
+
+
+
 
 estimateOR <- function(col1, col2) { 
   n <- length(col1)
@@ -197,6 +260,9 @@ for (i in 1:rep) {
     tables <- tables %>% mutate(
       class = ifelse(associated, 'associated', ifelse(bystander, 'bystander', 'not associated')) 
     )
+    
+    # Density plots
+    ggplot(tables, aes(x=est_or, colour=class)) + geom_density()
     
     # e <- res$nodes %>% dplyr::filter(startsWith(label,"event"), parent_id != -1)
     # events <- e$label 
