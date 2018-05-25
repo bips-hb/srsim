@@ -155,7 +155,7 @@ simulateSR <- function(n_reports = 100,
         optim(
           node$beta0,
           f_beta0,
-          method = "L-BFGS-B",
+          method = "BFGS",
           margprob = node$margprob,
           beta1 = node$beta1,
           margprob_parent = margprob_parent
