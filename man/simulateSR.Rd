@@ -5,10 +5,8 @@
 \title{Spontaneous Reporting Data based on a DAG}
 \usage{
 simulateSR(n_reports = 100, n_drugs = 10, n_events = 10,
-  alpha_drugs = 1, beta_drugs = 5, prob_drugs = rbeta(n_drugs,
-  alpha_drugs, beta_drugs), alpha_events = 1, beta_events = 5,
-  prob_events = rbeta(n_events, alpha_events, beta_events),
-  n_innocent_bystanders = 5, theta_drugs = 1.5, n_correlated_pairs = 2,
+  alpha_drugs = 1, beta_drugs = 20, alpha_events = 1, beta_events = 20,
+  n_innocent_bystanders = 5, bystander_prob = 0.9, n_correlated_pairs = 2,
   theta = 2, seed = NULL, valid_reports = TRUE, verbose = TRUE)
 }
 \arguments{
@@ -22,15 +20,9 @@ simulateSR(n_reports = 100, n_drugs = 10, n_events = 10,
 
 \item{beta_drugs}{Beta parameter for the drug marginal probabilities (Default: 5.0)}
 
-\item{prob_drugs}{Specific array with the marginal probability of the drugs (Default: Beta distribution)}
-
 \item{alpha_events}{Alpha parameter for the event marginal probabilities (Default: 1.0)}
 
 \item{beta_events}{Beta parameter for the event marginal probabilities (Default: 5.0)}
-
-\item{prob_events}{Specific array with the marginal probability of the events (Default: Beta distribution)}
-
-\item{theta_drugs}{The increase in odds-ratio when there is a connection between two drugs (Default: 1.5)}
 
 \item{n_correlated_pairs}{Number of drug-event pairs that will exhibit a nonzero correlation (Default: 2)}
 
@@ -42,9 +34,15 @@ simulateSR(n_reports = 100, n_drugs = 10, n_events = 10,
 
 \item{verbose}{Verbosity (Default: \code{TRUE})}
 
+\item{prob_drugs}{Specific array with the marginal probability of the drugs (Default: Beta distribution)}
+
+\item{prob_events}{Specific array with the marginal probability of the events (Default: Beta distribution)}
+
 \item{method}{The method used for generating the random DAG for the drugs (Default: \code{'er'}, Erdos-Renyi graph)}
 
 \item{exp_degree}{Average degree between the drugs in the random DAG (Default: 3)}
+
+\item{theta_drugs}{The increase in odds-ratio when there is a connection between two drugs (Default: 1.5)}
 
 \item{max_iter}{Maximum number of iterations (Default: 1000)}
 

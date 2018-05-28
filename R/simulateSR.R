@@ -62,13 +62,11 @@ simulateSR <- function(n_reports = 100,
                           n_drugs = 10, 
                           n_events = 10,
                           alpha_drugs = 1.0,
-                          beta_drugs = 5.0,
-                          prob_drugs = rbeta(n_drugs, alpha_drugs, beta_drugs), 
+                          beta_drugs = 20.0,
                           alpha_events = 1.0,
-                          beta_events = 5.0,
-                          prob_events = rbeta(n_events, alpha_events, beta_events), 
+                          beta_events = 20.0,
                           n_innocent_bystanders = 5, 
-                          theta_drugs = 1.5,
+                          bystander_prob = 0.9,
                           n_correlated_pairs = 2,
                           theta = 2,
                           seed = NULL,
@@ -80,15 +78,11 @@ simulateSR <- function(n_reports = 100,
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  
-  n_drugs  <- length(prob_drugs)
-  n_events <- length(prob_events)
+
   n        <- n_drugs + n_events
-  margprob <- c(prob_drugs, prob_events)
   sr       <- matrix(NA, nrow = n_reports, ncol = n) # matrix that will contain the reports 
   
-  beta <- log(theta)
-  beta_drugs <- log(theta_drugs)
+  beta <- log(theta) # coefficient for the logistic model given the desired OR, theta
   
   if (verbose) {cat("Creating DAG...\n")}
   DAG <- SRSim::createDAG(
@@ -104,13 +98,16 @@ simulateSR <- function(n_reports = 100,
   
   # a data frame that contains all the data for each node (or variate)
   nodes <- dplyr::tibble(
-    label = c(drug_labels, event_labels), 
-    in_degree = igraph::degree(DAG, mode = "in"), 
-    margprob = c(prob_drugs, prob_events),
-    beta0 = log(margprob / (1 - margprob)),  # the intercept when there are no parents
-    beta1 = 0, 
+    label = c(drug_labels, event_labels),
+    in_degree = igraph::degree(DAG, mode = "in"),
     id = 1:n,
-    parent_id = -1
+    parent_id = -1,
+    margprob = c(
+      rbeta(n_drugs, alpha_drugs, beta_drugs),
+      rbeta(n_events, alpha_events, beta_events)
+    ),
+    beta0 = log(margprob / (1 - margprob)),
+    beta1 = 0
   ) 
   
   # create also a tibble with all the edges
@@ -130,12 +127,18 @@ simulateSR <- function(n_reports = 100,
     
     # add the appropriate beta value for this edge
     if (to <= n_drugs) { # a drug 
-      if (length(theta_drugs) == 1) { 
-        nodes[nodes$id == to,]$beta1 <- log(theta_drugs)
-      } else {
-        nodes[nodes$id == to,]$beta1 <- log(max(1, rnorm(1, theta_drugs[1], theta_drugs[2])))
-      }
-    } else { 
+      no_bystander_prob <- rbeta(1, alpha_drugs, beta_drugs)
+      nodes[nodes$id == to,]$beta0 <-
+        log(no_bystander_prob / (1 - no_bystander_prob))
+      nodes[nodes$id == to,]$beta1 <-
+        log(bystander_prob / (1 - bystander_prob)) - log(no_bystander_prob / (1 - no_bystander_prob))
+      # recompute the marginal probability
+      margprob_parent <-
+        nodes[nodes$id == from, ]$margprob
+      nodes[nodes$id == to, ]$margprob <-
+        margprob_parent*bystander_prob + (1 - margprob_parent)*no_bystander_prob
+    } else { # an event
+      # determine beta1 
       if (length(theta) == 1) { 
         nodes[nodes$id == to,]$beta1 <- log(theta)
       } else {
@@ -145,12 +148,13 @@ simulateSR <- function(n_reports = 100,
   }
   
   
-  # determine the beta0's (the intercepts)
-  for (i in 1:nrow(nodes)) {
-    node <- nodes[i, ]
-    if (node$in_degree == 1) { 
-      # optimize the beta0 
-      margprob_parent <- nodes[nodes$id == node$parent_id, ]$margprob
+  # determine the beta0's (the intercepts) for the events
+  for (i in (n_drugs + 1):n) {
+    node <- nodes[i,]
+    if (node$in_degree != 0) {
+      # optimize the beta0
+      margprob_parent <-
+        nodes[nodes$id == node$parent_id, ]$margprob
       res <-
         optim(
           node$beta0,
@@ -208,8 +212,8 @@ simulateSR <- function(n_reports = 100,
       sr = sr,
       dag = DAG,
       nodes = nodes,
-      prob_drugs = prob_drugs,
-      prob_events = prob_events
+      prob_drugs = nodes$margprob[1:n_drugs],
+      prob_events = nodes$margprob[(n_drugs+1):n]
     )
   )
 }
