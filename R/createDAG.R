@@ -32,16 +32,13 @@ createDAG <- function(n_drugs = 10,
   DAG <- igraph::graph.empty(n = n, directed = TRUE)
   
   # add the innocent bystanders 
-  if (n_innocent_bystanders == 0) { 
-    edges <- c() 
-  } else { 
+  if (n_innocent_bystanders != 0) { 
     edges <- c(matrix(c(1:n_innocent_bystanders, (n_drugs/2 + 1):(n_drugs/2+n_innocent_bystanders)), 2, byrow = TRUE)) 
+    DAG <- igraph::graph(edges, n = n, directed = TRUE)
   }
   
-  DAG <- igraph::graph(edges, n = n, directed = TRUE)
-  
   # add the random connections between the drugs and the events
-  edges <- c(matrix(c(1:n_innocent_bystanders, (n_drugs+1):(n_drugs+n_innocent_bystanders)), 2, byrow = TRUE))
+  edges <- c(matrix(c(1:n_correlated_pairs, (n_drugs+1):(n_drugs+n_correlated_pairs)), 2, byrow = TRUE))
   DAG <- igraph::add.edges(DAG, edges) 
   
   return(DAG)
