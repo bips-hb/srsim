@@ -1,14 +1,13 @@
-#' Spontaneous Reporting Data based on a DAG
+#' Simulating a Spontaneous Reporting System
 #'
-#' \code{simulateSRData} simulates a spontaneous reporting (SR) data set. It allows for setting
-#' the partial probabilities of the drugs and the events, \strong{and} for setting the 
-#' correlations not only between the drugs and the events, but also between the drugs and the 
-#' events themselves. 
+#' \code{simulateSRS} simulates a spontaneous reporting (SR) data set. The relationships between
+#' the drugs and the adverse events (AEs) are specified by a directed acyclic graph (DAG), 
+#' see \code{\link{generateDAG}}. 
 #' \cr\cr
-#' Each report to a SR system contains two lists: 
+#' Each report to a SRS contains two lists: 
 #' \enumerate{
 #'   \item the drugs to which the patient was (thought to be) exposed to, and 
-#'   \item the adverse events that the patient experienced. 
+#'   \item the AEs that the patient experienced. 
 #' }
 #' We will represent each report as a binary vector. The first items represent whether 
 #' the patient was exposed to the drug (\code{1} if he/she was, and \code{0} otherwise). 
@@ -31,50 +30,59 @@
 #' @param n_drugs Number of drugs (Default: 10)
 #' @param n_events Number of adverse drug events (Default: 10)
 #' @param alpha_drugs Alpha parameter for the drug marginal probabilities (Default: 1.0)
-#' @param beta_drugs Beta parameter for the drug marginal probabilities (Default: 5.0)
-#' @param prob_drugs Specific array with the marginal probability of the drugs (Default: Beta distribution)
+#' @param beta_drugs Beta parameter for the drug marginal probabilities (Default: 20.0)
 #' @param alpha_events Alpha parameter for the event marginal probabilities (Default: 1.0)
-#' @param beta_events Beta parameter for the event marginal probabilities (Default: 5.0)
-#' @param prob_events Specific array with the marginal probability of the events (Default: Beta distribution)
-#' @param method The method used for generating the random DAG for the drugs (Default: \code{'er'}, Erdos-Renyi graph)
-#' @param exp_degree Average degree between the drugs in the random DAG (Default: 3)
-#' @param theta_drugs The increase in odds-ratio when there is a connection between two drugs (Default: 1.5)
-#' @param n_correlated_pairs Number of drug-event pairs that will exhibit a nonzero correlation (Default: 2)
-#' @param theta Increase in odds-ratio when there is an edge going from a drug to an event (Default: 2.0)
-#' @param valid_reports If \code{TRUE}, only valid reports (with at least one drug and at least one event) are accepted. (Default: \code{TRUE})
-#' @param max_iter Maximum number of iterations (Default: 1000) 
+#' @param beta_events Beta parameter for the event marginal probabilities (Default: 20.0)
+#' @param n_innocent_bystanders Number of innocent bystanders (Default: 5)
+#' @param bystander_prob The conditional probability of the innocent bystander being one when 
+#'                       the drug that is actually causing the AE is equal to 1. This parameter
+#'                       corresponds to \eqn{\gamma} in the paper (Default: .9)
+#' @param n_correlated_pairs Number of drug-AE pairs that are associated (Default: 2)
+#' @param theta Increase in odds-ratio when there is an edge going from a drug to an AE (Default: 2.0).
+#'              In case theta is a vector of length two, the odds ratio is drawn from a truncated 
+#'              Normal distribution with mean \code{theta[1]} and variance \code{theta[2]}
+#' @param valid_reports If \code{TRUE}, only valid reports (with at least one drug and at least one AE) 
+#'                      are accepted. (Default: \code{TRUE})
 #' @param seed The seed used by the RNG (Default: automatically set)
-#' @param DAG The DAG used for the simulation. By default generated with the other parameters given to this function
 #' @param verbose Verbosity (Default: \code{TRUE})
 #'
-#' @return \item{sr}{A data frame with the simulated reports. The columns are named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
-#'         \item{prob_drugs}{A list with marginal probabilities of the drugs}
-#'         \item{prob_events}{A list with marginal probabilities of the events}
-#'         \item{adjencency_matrix}{The adjecency matrix of the DAG used}
-#'         \item{nodes}{A tibble with all the information on each node/variate}
+#' @return \item{sr}{A binary data frame with the simulated reports. The columns are 
+#'                   named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
+#'         \item{dag}{The directed acycled graph as an \code{igraph} object}
+#'         \item{nodes}{A tibble with all the information on each node/variate:
+#'             \itemize{
+#'                \item{\code{label}}{ The label for each node/variate}
+#'                \item{\code{in_degree}}{ The number of edges pointing to the node}
+#'                \item{\code{id}}{ The ID of each node (simple integer)}
+#'                \item{\code{parent_id}}{ The ID of the parent node - if any. Otherwise equal to \code{-1}}
+#'                \item{\code{margprob}}{ The marginal probability of the node/variate}
+#'                \item{\code{beta0}}{ The intercept in the logistic regression model for that node}
+#'                \item{\code{beta1}}{ The regression coefficient in the logistic regression model for the parent}
+#'             }
+#'         }
+#'         \item{prob_drugs}{A vector with marginal probabilities of the drugs}
+#'         \item{prob_events}{A vector with marginal probabilities of the events}
+#'         
 #'
-#' @seealso \code{\link{create2x2Tables}}, 
-#'          \code{\link{generateCorrelationMatrix}}, 
-#'          \code{\link{validReport}},
-#'          \code{\link{validCorrelation}}               
+#' @seealso \code{\link{convert2Tables}}, 
+#'          \code{\link{generateDAG}}      
 #' @export
-simulateSR <- function(n_reports = 100, 
-                          n_drugs = 10, 
-                          n_events = 10,
-                          alpha_drugs = 1.0,
-                          beta_drugs = 20.0,
-                          alpha_events = 1.0,
-                          beta_events = 20.0,
-                          n_innocent_bystanders = 5, 
-                          bystander_prob = 0.9,
-                          n_correlated_pairs = 2,
-                          theta = 2,
-                          seed = NULL,
-                          valid_reports = TRUE, 
-                          verbose = TRUE) { 
+simulateSRS <- function(n_reports = 100,
+                        n_drugs = 10,
+                        n_events = 10,
+                        alpha_drugs = 1.0,
+                        beta_drugs = 20.0,
+                        alpha_events = 1.0,
+                        beta_events = 20.0,
+                        n_innocent_bystanders = 5,
+                        bystander_prob = 0.9,
+                        n_correlated_pairs = 2,
+                        theta = 2,
+                        valid_reports = TRUE,
+                        seed = NULL,
+                        verbose = TRUE) {
   
-  
-  # set the seed
+  # set the seed ---
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -84,14 +92,18 @@ simulateSR <- function(n_reports = 100,
   
   beta <- log(theta) # coefficient for the logistic model given the desired OR, theta
   
-  if (verbose) {cat("Creating DAG...\n")}
-  DAG <- SRSim::createDAG(
+  # generate the DAG ---
+  
+  if (verbose) { cat("Creating DAG...\n") }
+  
+  DAG <- SRSim::generateDAG(
     n_drugs = n_drugs,
     n_events = n_events,
     n_innocent_bystanders = n_innocent_bystanders,
     n_correlated_pairs = n_correlated_pairs
   )
-  if (verbose) {cat("DONE Creating DAG...\n")}
+  
+  if (verbose) { cat("DONE Creating DAG...\n") }
 
   drug_labels <- sprintf("drug%d", 1:n_drugs)
   event_labels <- sprintf("event%d", 1:n_events)
@@ -110,7 +122,7 @@ simulateSR <- function(n_reports = 100,
     beta1 = 0
   ) 
   
-  # create also a tibble with all the edges
+  # create a tibble with all the edges
   edgelist <- igraph::as_edgelist(DAG)
   edges <- tibble(
     from = edgelist[,1], 
@@ -132,6 +144,7 @@ simulateSR <- function(n_reports = 100,
         log(no_bystander_prob / (1 - no_bystander_prob))
       nodes[nodes$id == to,]$beta1 <-
         log(bystander_prob / (1 - bystander_prob)) - log(no_bystander_prob / (1 - no_bystander_prob))
+      
       # recompute the marginal probability
       margprob_parent <-
         nodes[nodes$id == from, ]$margprob
@@ -146,7 +159,6 @@ simulateSR <- function(n_reports = 100,
       }
     }
   }
-  
   
   # determine the beta0's (the intercepts) for the events
   for (i in (n_drugs + 1):n) {
@@ -186,13 +198,12 @@ simulateSR <- function(n_reports = 100,
         nodes$in_degree,
         nodes$beta0,
         nodes$beta1,
-        nodes$parent_id,
-        verbose
+        nodes$parent_id
       )
     
     if (valid_reports) {
       # check whether the report is valid 
-      if (SRSim::validReport(t(matrix(report == 1)), n_drugs, n_events)) {
+      if (validReport(t(matrix(report == 1)), n_drugs, n_events)) {
         sr[n_reports_generated,] <- report
         n_reports_generated <- n_reports_generated + 1
       }
@@ -201,7 +212,7 @@ simulateSR <- function(n_reports = 100,
       n_reports_generated <- n_reports_generated + 1
     }
     
-    if (verbose) {setTxtProgressBar(pb, n_reports_generated)}
+    if (verbose) { setTxtProgressBar(pb, n_reports_generated) }
   }
   
   sr <- as_tibble(sr)

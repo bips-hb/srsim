@@ -17,304 +17,43 @@ validReport <- function(report, n_drugs, n_events) {
     .Call('_SRSim_validReport', PACKAGE = 'SRSim', report, n_drugs, n_events)
 }
 
-#' Correlations and Marginal Probabilities 
+#' Simulate a single Report
 #' 
-#' Returns \code{TRUE} when two binary variables with the given marginal probabilities
-#' \code{p_x} and \code{p_y} can have a correlation of \code{rho}. Otherwise it returns 
-#' \code{FALSE}. 
+#' Returns a single report for a spontaneous reporting system. 
+#' Note that this function does not check whether the report is 
+#' 'valid', see \code{\link{validReport}}
 #' 
-#' Suppose two binary variables, \eqn{X} and \eqn{Y}, have the marginal probabilities
-#' \eqn{p(X = 1) = p_X} and \eqn{p(Y = 1) = p_Y}. Their common probability is equal to 
-#' \eqn{p(X = 1, Y = 1) = p_{XY}}. Their correlation, \eqn{\rho}, can then be written as
-#' \deqn{\rho = \frac{p_{XY} - p_{X}p_{Y}}{\sqrt{p_{X} (1 - p_{X}) p_{Y} (1 - p(Y))}}}
-#' One can see that not every correlation is admissable given the marginal probabilities. 
-#' In fact, the correlation must lie within the interval
-#' \deqn{max(-\alpha_X \alpha_Y, -1/(\alpha_X \alpha_Y)) \le \rho \le min(\alpha_i/\alpha_j, \alpha_j / \alpha_i)}
-#' where \eqn{\alpha_X = \sqrt{p_X (1 - p_X)}} and \eqn{\alpha_Y = \sqrt{p_Y (1 - p_Y)}}.
-#' These constraints are a result of the Fréchet inequalities. 
-#' 
-#' @param rho The correlation (\eqn{\rho})
-#' @param p_x The probability \eqn{p(X = 1)}
-#' @param p_y The probability \eqn{p(Y = 1)}
-#' 
-#' @return \code{TRUE} when the two binary variables can exhibit the given correlation, \code{FALSE} otherwise
-#' @export
-validCorrelation <- function(rho, p_x, p_y) {
-    .Call('_SRSim_validCorrelation', PACKAGE = 'SRSim', rho, p_x, p_y)
-}
-
-#' Randows Rows 
-#' 
-#' Returns a random sample of rows from an integer matrix (without replacement). 
-#' 
-#' @section Warning:
-#' The matrix can contain integers only. 
-#' 
-#' @param mat A integer matrix 
-#' @param nrows The number of rows of the matrix \code{mat}
-#' @param n_samples The number of rows one wants to sample 
-#' 
-#' @return An integer matrix with \code{n_samples} rows
-#' @export
-sampleRandomRows <- function(mat, nrows, n_samples) {
-    .Call('_SRSim_sampleRandomRows', PACKAGE = 'SRSim', mat, nrows, n_samples)
-}
-
-#' Random Drug-Event Pairs 
-#' 
-#' Returns a number of randomly select drug-event pairs that can exhibit a desired
-#' correlation (\code{rho}). 
-#' 
-#' @param prob_drugs List with the marginal probabilities of the drugs 
-#' @param prob_events List with the marginal probabilities of the events
-#' @param n_wanted_pairs The number of randomly selected pairs 
-#' @param rho The correlation one wants these pairs to have
-#' 
-#' @return A matrix with \code{n_wanted_pairs} rows and two column. Each row are the 
-#'         indices of a drug-event pair (the first index is for the drug, the second
-#'         for the event)
-#' 
-#' @seealso \code{\link{validCorrelation}}, \code{\link{sampleRandomRows}}, 
-#'          \code{\link{returnRandomPairsRcpp}}
-#' @export
-returnRandomDrugEventPairsRcpp <- function(prob_drugs, prob_events, n_wanted_pairs, rho) {
-    .Call('_SRSim_returnRandomDrugEventPairsRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_wanted_pairs, rho)
-}
-
-#' Random Pairs 
-#' 
-#' Returns a number of randomly select (drug-drug or event-event) pairs that can 
-#' exhibit a desired correlation (\code{rho}). 
-#' 
-#' @param margprob List with the marginal probabilities 
-#' @param n_wanted_pairs The number of randomly selected pairs 
-#' @param rho The correlation one wants these pairs to exhibit 
-#' 
-#' @return A matrix with \code{n_wanted_pairs} rows and two column. Each row are the 
-#'         indices of a pair
-#' 
-#' @seealso  \code{\link{validCorrelation}}, \code{\link{sampleRandomRows}}, 
-#'           \code{\link{returnRandomDrugEventPairsRcpp}}
-returnRandomPairsRcpp <- function(margprob, n_wanted_pairs, rho) {
-    .Call('_SRSim_returnRandomPairsRcpp', PACKAGE = 'SRSim', margprob, n_wanted_pairs, rho)
-}
-
-#' Correlation Matrix 
-#' 
-#' Generates a correlation matrix for the SR data set. It randomly selects 
-#' a number of drug-event, drug-drug, and event-event pairs to exhibit a 
-#' given correlation. It takes the marginal probabilities of the drugs and 
-#' events into account, to make sure that the pairs can indeed show the 
-#' wanted correlation (see the function \code{\link{validCorrelation}}).
-#' 
-#' @param prob_drugs List with the marginal probabilities of the drugs 
-#' @param prob_events List with the marginal probabilities of the events
-#' @param n_correlated_drugs The number of drug-drug pairs that will have correlation \code{rho_drugs}
-#' @param rho_drugs The correlation for the drug-drug pairs 
-#' @param n_correlated_events The number of event-event pairs that will have correlation \code{rho_events}
-#' @param rho_events The correlation for the event-event pairs 
-#' @param n_correlated_pairs The number of drug-event pairs that will have correlation \code{rho}
-#' @param rho The correlation for the drug-event pairs 
-#' 
-#' @return A matrix 
-#' 
-#' @section Warning: 
-#' The matrix that is returned is not guaranteed to be a correlation matrix. 
-#' One still needs to check whether the matrix is indeed postive definite. 
-#' 
-#' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
-#'          \code{\link{returnRandomDPairsRcpp}},
-#'          \code{\link{validCorrelation}}
-#' @export
-generateCorrelationMatrixRcpp <- function(prob_drugs, prob_events, n_correlated_drugs, rho_drugs, n_correlated_events, rho_events, n_correlated_pairs, rho) {
-    .Call('_SRSim_generateCorrelationMatrixRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_correlated_drugs, rho_drugs, n_correlated_events, rho_events, n_correlated_pairs, rho)
-}
-
-#' Block Correlation Matrix
-#' 
-#' @param margprob List with the marginal probabilities
-#' @param blocksize The size of the blocks
-#' 
-#' @return A matrix
-#' 
-#' @section Warning: 
-#' The matrix that is returned is not guaranteed to be a correlation matrix. 
-#' One still needs to check whether the matrix is indeed postive definite. 
-#'
-#' @export
-generateBlockCorrelationMatrixRcpp <- function(margprob, blocksize, rho) {
-    .Call('_SRSim_generateBlockCorrelationMatrixRcpp', PACKAGE = 'SRSim', margprob, blocksize, rho)
-}
-
-#' Simple Random Correlation Matrix
-#' 
-#' @param margprob List with the marginal probabilities
-#'
-#' @return A matrix 
-#' 
-#' @section Warning: 
-#' The matrix that is returned is not guaranteed to be a correlation matrix. 
-#' One still needs to check whether the matrix is indeed postive definite. 
-#' 
-#' @export
-generateSimpleRandomCorrelationMatrix <- function(margprob) {
-    .Call('_SRSim_generateSimpleRandomCorrelationMatrix', PACKAGE = 'SRSim', margprob)
-}
-
-#' Random Correlation Matrix 
-#' 
-#' Generates a correlation matrix for the SR data set. It randomly selects 
-#' a number of drug-event, drug-drug, and event-event pairs to exhibit a 
-#' given correlation. It takes the marginal probabilities of the drugs and 
-#' events into account, to make sure that the pairs can indeed show the 
-#' wanted correlation (see the function \code{\link{validCorrelation}}).
-#' 
-#' @param prob_drugs List with the marginal probabilities of the drugs 
-#' @param prob_events List with the marginal probabilities of the events
-#' @param n_correlated_pairs The number of drug-event pairs that will have correlation \code{rho}
-#' @param rho The correlation for the drug-event pairs 
-#' 
-#' @return \item{corrmat}{A (potential) correlation matrix}
-#'         \item{de_pairs}{A integer matrix with the drug-event pairs}
-#' 
-#' @section Warning: 
-#' The matrix that is returned is not guaranteed to be a correlation matrix. 
-#' One still needs to check whether the matrix is indeed postive definite. 
-#' 
-#' @seealso \code{\link{returnRandomDrugEventPairsRcpp}}, 
-#'          \code{\link{returnRandomDPairsRcpp}},
-#'          \code{\link{validCorrelation}}
-#' @export
-generateRandomCorrelationMatrixRcpp <- function(prob_drugs, prob_events, n_correlated_pairs, rho) {
-    .Call('_SRSim_generateRandomCorrelationMatrixRcpp', PACKAGE = 'SRSim', prob_drugs, prob_events, n_correlated_pairs, rho)
-}
-
-#' From Correlation To Covariance Matrix
-#' 
-#' Converts a correlation matrix for binary variates to a covariance matrix given the
-#' variables marginal probabilities. 
-#' 
-#' @param corrmat The correlation matrix 
-#' @param margprob A list with the marginal probabilities 
-#' 
-#' @return The covariance matrix
-#' @export
-corr2cov <- function(corrmat, margprob) {
-    .Call('_SRSim_corr2cov', PACKAGE = 'SRSim', corrmat, margprob)
-}
-
-#' Sampling Multivariate Normal 
-#' 
-#' Returns a sample of multivariate normal data. The code is based on the code 
-#' from \link{http://gallery.rcpp.org/articles/simulate-multivariate-normal/} 
-#' 
-#' @param n The number of samples
-#' @param mu Vector with the means 
-#' @param L The Cholesky decomposition of the covariance matrix 
-#' @param ncols The number of variates 
-#' 
-#' @return A matrix, where each row is a sample 
-#' 
-#' @examples
-#' arma::mat L = arma::chol(covmat) ;   // covmat is the covariance matrix
-#' arma::mat sample = mvrnormArma(n, means, L, covmat.n_cols) ; 
-#'
-mvrnormArma <- function(n, mu, L, ncols) {
-    .Call('_SRSim_mvrnormArma', PACKAGE = 'SRSim', n, mu, L, ncols)
-}
-
-#' Larger than Zero 
-#' 
-#' Turns a numerical matrix into a logical matrix, by checking for
-#' every item whether it is (strictly) larger than zero. 
-#' 
-#' @param raw The numerical matrix 
-#' 
-#' @return Logical matrix 
-threshold <- function(raw) {
-    .Call('_SRSim_threshold', PACKAGE = 'SRSim', raw)
-}
-
-#' Generating Reports
-#' 
-#' Generates a number of reports. First, we sample from a multivariate normal distribution.
-#' We then turn the sampled data into binary data, by checking whether the values are 
-#' larger than zero or not.
-#' \cr\cr
-#' A report normally contains a least one drug and at least one event. In order to make 
-#' sure that is the case, we check whether the generated report is indeed valid 
-#' (see the function \code{\link{validReport}}). One can turn this off by setting
-#' \code{valid_reports} to \code{FALSE}
-#' 
-#' @param n_reports The number of reports generated
-#' @param means The mean of the multivariate normal distribution
-#' @param L The Cholesky decomposition of the covariance matrix of the multivariate normal distribution
-#' @param valid_reports When \code{TRUE}, only valid reports are added 
 #' @param n_drugs The number of drugs 
-#' @param n_events The number of events
-#' @param verbose Verbosity. If \code{TRUE}, the function prints the 
-#'                 number of reports that have been processed. Works only when valid_reports is \code{TRUE}
+#' @param n_events The number of events 
+#' @param n_parents A vector with the number of parents for each of the nodes
+#' @param beta0 A vector with the intercepts for the logistic regression models
+#' @param beta1 A vector with the regression coefficients for each node 
+#' @param parent_id A vector with the id of the parent 
 #' 
-#' @return A logical matrix. Each row is a report. The number of columns is equal to \code{n_drugs + n_events}
-#' @seealso \code{\link{validReport}}
-generateReports <- function(n_reports, means, L, valid_reports, n_drugs, n_events, verbose) {
-    .Call('_SRSim_generateReports', PACKAGE = 'SRSim', n_reports, means, L, valid_reports, n_drugs, n_events, verbose)
-}
-
-simulateReport <- function(n_drugs, n_events, n_parents, beta0, beta1, parent_id, verbose) {
-    .Call('_SRSim_simulateReport', PACKAGE = 'SRSim', n_drugs, n_events, n_parents, beta0, beta1, parent_id, verbose)
-}
-
-#' Simulate a single report from a DAG
-#' 
-#' Returns a single report based on a DAG structure. 
-#' 
-#' @param n_drugs The number of drugs in the SR
-#' @param n_events The number of events in the SR
-#' @param id A list with the indices of the drugs and the events 
-#' 
-simulateReportDAG <- function(n_drugs, n_events, beta0, betas, verbose) {
-    .Call('_SRSim_simulateReportDAG', PACKAGE = 'SRSim', n_drugs, n_events, beta0, betas, verbose)
-}
-
-#' Create 2 x 2 Tables based on DAG generated SR data
-#' 
-#' Creates a data frame containing all 2 x 2 contingency tables 
-#' from the results generated by generateSRDAG. 
-#' See the R wrapper function \code{\link{create2x2TablesDAG}}
-#' for more information. 
-#' 
-#' @param reports A binary matrix. Each row is a report
-#' @param oddsratios The matrix with the odds ratio increase for each pair of variates
-#' @param n_parents List with the number of parents for each node
-#' @param prob_drugs A list with the marginal probabilities of the drugs 
-#' @param prob_events A list with the marginal probabilities of the events
-#' 
-#' @return A dataframe. A description of the columns can be found in the commentary
-#'         for the function \code{\link{create2x2TablesDAG}}
-#' 
-#' @seealso \code{\link{create2x2TablesDAG}}
-create2x2TablesDAGRcpp <- function(reports, prob_drugs, prob_events, n_parents, parent_id, beta1) {
-    .Call('_SRSim_create2x2TablesDAGRcpp', PACKAGE = 'SRSim', reports, prob_drugs, prob_events, n_parents, parent_id, beta1)
+#' @return A binary vector
+simulateReport <- function(n_drugs, n_events, n_parents, beta0, beta1, parent_id) {
+    .Call('_SRSim_simulateReport', PACKAGE = 'SRSim', n_drugs, n_events, n_parents, beta0, beta1, parent_id)
 }
 
 #' Create 2 x 2 Tables 
 #' 
 #' Creates a data frame containing all 2 x 2 contingency tables 
-#' from the results generated by generateSRData. 
-#' See the R wrapper function \code{\link{create2x2Tables}}
+#' from the results generated by \code{\link{simulateSRS}}. 
+#' See the R wrapper function \code{\link{convert2Tables}}
 #' for more information. 
 #' 
 #' @param reports A binary matrix. Each row is a report
-#' @param corrmat The correlation matrix
-#' @param prob_drugs A list with the marginal probabilities of the drugs 
-#' @param prob_events A list with the marginal probabilities of the events
+#' @param prob_drugs A vector with the marginal probabilities of the drugs 
+#' @param prob_events A vector with the marginal probabilities of the events
+#' @param n_parents A vector with the number of parents for each of the nodes
+#' @param parent_id A vector with the id of the parent 
+#' @param beta1 A vector with the regression coefficients for each node 
 #' 
 #' @return A dataframe. A description of the columns can be found in the commentary
-#'         for the function \code{\link{create2x2Tables}}
+#'         for the function \code{\link{convert2Tables}}
 #' 
-#' @seealso \code{\link{create2x2Tables}}
-create2x2TablesRcpp <- function(reports, corrmat, prob_drugs, prob_events) {
-    .Call('_SRSim_create2x2TablesRcpp', PACKAGE = 'SRSim', reports, corrmat, prob_drugs, prob_events)
+#' @seealso \code{\link{convert2Tables}}
+create2x2TablesDAGRcpp <- function(reports, prob_drugs, prob_events, n_parents, parent_id, beta1) {
+    .Call('_SRSim_create2x2TablesDAGRcpp', PACKAGE = 'SRSim', reports, prob_drugs, prob_events, n_parents, parent_id, beta1)
 }
 
