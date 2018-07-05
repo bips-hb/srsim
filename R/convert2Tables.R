@@ -30,7 +30,7 @@
 #'
 #' @seealso \code{\link{simulateSRS}}
 #' @export
-create2x2TablesDAG <- function(sr) {
+convert2Tables <- function(sr) {
   return(dplyr::as_tibble(
     create2x2TablesDAGRcpp(
       as.matrix(sr$sr),
