@@ -1,6 +1,6 @@
-# SRSim: Simulating Spontaneous Reporting Systems
+# Simulating Spontaneous Reporting Systems (SRSim)
 
-Spontaneous reporting systems are used in the field of pharmacovigilance to detect (previously unknown) associations between drug exposures and adverse events (AEs). This packages allows for simulating large spontaneous reporting data sets. 
+Spontaneous reporting systems are used in the field of pharmacovigilance to detect (previously unknown) associations between drugs and adverse events (AEs). This `R` package allows for simulating large spontaneous reporting data sets. See www.srs.bips.eu for an example on how this simulator could be used.   
 
 ### Installation 
 To install, simply type in R
@@ -10,12 +10,22 @@ devtools::install_github("bips-hb/srsim")
 ```
 
 ### Usage
+
 See for usage the function descriptions, especially 
 ```R
 ?SRSim::simulateSRS
 ```
 
+### References
+
+Please cite 
+
+__Adverse Event Discovery for Spontaneous Reporting Systems: A Systematic Comparison__\
+*L.J. Dijkstra, M. Garling, R. Foraita & I. Pigeot*\
+To be submitted (2018)
+
 ### Contact
 
-Author: Louis Dijkstra
+Louis Dijkstra\
+Leibniz Institute for Prevention Research & Epidemiology  
 E-mail: dijkstra (at) leibniz-bips.de
