@@ -20,7 +20,7 @@ See for usage the function descriptions, especially
 
 Please cite 
 
-__Adverse Event Discovery for Spontaneous Reporting Systems: A Systematic Comparison__\
+__Adverse Event or Innocent Bystander? A Systematic Comparison of Statistical Discovery Methods for Spontaneous Reporting Systems__\
 *L.J. Dijkstra, M. Garling, R. Foraita & I. Pigeot*\
 To be submitted (2018)
 
