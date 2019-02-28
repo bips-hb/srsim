@@ -23,6 +23,10 @@ Please cite
 __Adverse Event or Innocent Bystander? A Systematic Comparison of Statistical Discovery Methods for Spontaneous Reporting Systems__\
 *L.J. Dijkstra, M. Garling, R. Foraita & I. Pigeot*\
 To be submitted (2018)
+ 
+### Acknowledgments
+Funded by the Innovation Fund of the German Joint Federal Committee
+(G-BA, 01VSF16020)
 
 ### Contact
 
