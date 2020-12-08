@@ -25,9 +25,9 @@ L.J. Dijkstra, M. Garling, R. Foraita & I. Pigeot\
 *Pharmacoepidemiology and Drug Safety* (2020)\
 DOI:10.1002/PDS.4970
  
-### Acknowledgments
-Funded by the Innovation Fund of the German Joint Federal Committee
-(G-BA, 01VSF16020)
+### Acknowledgements
+
+We gratefully acknowledge the financial support from the innovation fund (“Innovationsfonds”) of the Federal Joint Committee in Germany (grant number: 01VSF16020).
 
 ### Contact
 
