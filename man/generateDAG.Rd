@@ -28,5 +28,5 @@ The DAG as an \code{igraph} object
 spontaneous reporting data
 }
 \seealso{
-\code{\link{simulateSRS}}
+\code{\link[=simulateSRS]{simulateSRS()}}
 }

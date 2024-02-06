@@ -57,31 +57,31 @@ are accepted. (Default: \code{TRUE})}
 }
 \value{
 \item{sr}{A binary data frame with the simulated reports. The columns are
-                  named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
-        \item{dag}{The directed acycled graph as an \code{igraph} object}
-        \item{nodes}{A tibble with all the information on each node/variate:
-            \itemize{
-               \item{\code{label}}{ The label for each node/variate}
-               \item{\code{in_degree}}{ The number of edges pointing to the node}
-               \item{\code{id}}{ The ID of each node (simple integer)}
-               \item{\code{parent_id}}{ The ID of the parent node - if any. Otherwise equal to \code{-1}}
-               \item{\code{margprob}}{ The marginal probability of the node/variate}
-               \item{\code{beta0}}{ The intercept in the logistic regression model for that node}
-               \item{\code{beta1}}{ The regression coefficient in the logistic regression model for the parent}
-            }
-        }
-        \item{prob_drugs}{A vector with marginal probabilities of the drugs}
-        \item{prob_events}{A vector with marginal probabilities of the events}
+named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
+\item{dag}{The directed acycled graph as an \code{igraph} object}
+\item{nodes}{A tibble with all the information on each node/variate:
+\itemize{
+\item{\code{label}}{ The label for each node/variate}
+\item{\code{in_degree}}{ The number of edges pointing to the node}
+\item{\code{id}}{ The ID of each node (simple integer)}
+\item{\code{parent_id}}{ The ID of the parent node - if any. Otherwise equal to \code{-1}}
+\item{\code{margprob}}{ The marginal probability of the node/variate}
+\item{\code{beta0}}{ The intercept in the logistic regression model for that node}
+\item{\code{beta1}}{ The regression coefficient in the logistic regression model for the parent}
+}
+}
+\item{prob_drugs}{A vector with marginal probabilities of the drugs}
+\item{prob_events}{A vector with marginal probabilities of the events}
 }
 \description{
 \code{simulateSRS} simulates a spontaneous reporting (SR) data set. The relationships between
 the drugs and the adverse events (AEs) are specified by a directed acyclic graph (DAG),
-see \code{\link{generateDAG}}.
+see \code{\link[=generateDAG]{generateDAG()}}.
 \cr\cr
 Each report to a SRS contains two lists:
 \enumerate{
-  \item the drugs to which the patient was (thought to be) exposed to, and
-  \item the AEs that the patient experienced.
+\item the drugs to which the patient was (thought to be) exposed to, and
+\item the AEs that the patient experienced.
 }
 We will represent each report as a binary vector. The first items represent whether
 the patient was exposed to the drug (\code{1} if he/she was, and \code{0} otherwise).
@@ -101,6 +101,6 @@ want to check the validity and wants to allow any binary sequence, one can set
 \code{valid_reports} to \code{FALSE}.
 }
 \seealso{
-\code{\link{convert2Tables}},
-         \code{\link{generateDAG}}
+\code{\link[=convert2Tables]{convert2Tables()}},
+\code{\link[=generateDAG]{generateDAG()}}
 }

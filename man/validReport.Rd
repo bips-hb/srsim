@@ -18,6 +18,6 @@ validReport(report, n_drugs, n_events)
 }
 \description{
 Checks whether the given report is 'valid'. A report should contain at least
-one drug and at least one event (otherwise it would never been sent to the 
+one drug and at least one event (otherwise it would never been sent to the
 spontaneous reporitng sytem anyway).
 }

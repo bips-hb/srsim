@@ -1,8 +1,8 @@
 #' Simulating a Spontaneous Reporting System
 #'
-#' \code{simulateSRS} simulates a spontaneous reporting (SR) data set. The relationships between
+#' `simulateSRS` simulates a spontaneous reporting (SR) data set. The relationships between
 #' the drugs and the adverse events (AEs) are specified by a directed acyclic graph (DAG),
-#' see \code{\link{generateDAG}}.
+#' see [generateDAG()].
 #' \cr\cr
 #' Each report to a SRS contains two lists:
 #' \enumerate{
@@ -10,21 +10,21 @@
 #'   \item the AEs that the patient experienced.
 #' }
 #' We will represent each report as a binary vector. The first items represent whether
-#' the patient was exposed to the drug (\code{1} if he/she was, and \code{0} otherwise).
+#' the patient was exposed to the drug (`1` if he/she was, and `0` otherwise).
 #' The second part represents whether the patient experienced the event or not
-#' (\code{1} if he/she did, and \code{0} otherwise). For example, if there are 3 drugs and
+#' (`1` if he/she did, and `0` otherwise). For example, if there are 3 drugs and
 #' 4 events in total, a typical report could be
 #' \deqn{0 1 0 1 1 0 0}
 #' which represents that the patient was exposed to drug 2 (but not to drug 1 and 3), and
 #' experienced event 1 and 2 (but not 3 and 4). The simulation results in a binary matrix
 #' where each row is a report.
 #' \cr\cr
-#' \strong{Valid Reports} Not any binary sequence is a valid report. Each report
+#' **Valid Reports** Not any binary sequence is a valid report. Each report
 #' should contain at least one drug and at least one event  (otherwise it would
 #' never been sent to the spontaneous reporitng sytem).
 #' While generating reports, we make sure that this is indeed the case. When one does not
 #' want to check the validity and wants to allow any binary sequence, one can set
-#' \code{valid_reports} to \code{FALSE}.
+#' `valid_reports` to `FALSE`.
 #'
 #' @param n_reports Number of reports (Default: 100)
 #' @param n_drugs Number of drugs (Default: 10)
@@ -40,32 +40,32 @@
 #' @param n_correlated_pairs Number of drug-AE pairs that are associated (Default: 2)
 #' @param theta Increase in odds-ratio when there is an edge going from a drug to an AE (Default: 2.0).
 #'              In case theta is a vector of length two, the odds ratio is drawn from a truncated
-#'              Normal distribution with mean \code{theta[1]} and variance \code{theta[2]}
-#' @param valid_reports If \code{TRUE}, only valid reports (with at least one drug and at least one AE)
-#'                      are accepted. (Default: \code{TRUE})
+#'              Normal distribution with mean `theta[1]` and variance `theta[2]`
+#' @param valid_reports If `TRUE`, only valid reports (with at least one drug and at least one AE)
+#'                      are accepted. (Default: `TRUE`)
 #' @param seed The seed used by the RNG (Default: automatically set)
-#' @param verbose Verbosity (Default: \code{TRUE})
+#' @param verbose Verbosity (Default: `TRUE`)
 #'
 #' @return \item{sr}{A binary data frame with the simulated reports. The columns are
-#'                   named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
-#'         \item{dag}{The directed acycled graph as an \code{igraph} object}
+#'                   named `drug1`, `drug2` ..., `event1`, `event2`, ...}
+#'         \item{dag}{The directed acycled graph as an `igraph` object}
 #'         \item{nodes}{A tibble with all the information on each node/variate:
 #'             \itemize{
-#'                \item{\code{label}}{ The label for each node/variate}
-#'                \item{\code{in_degree}}{ The number of edges pointing to the node}
-#'                \item{\code{id}}{ The ID of each node (simple integer)}
-#'                \item{\code{parent_id}}{ The ID of the parent node - if any. Otherwise equal to \code{-1}}
-#'                \item{\code{margprob}}{ The marginal probability of the node/variate}
-#'                \item{\code{beta0}}{ The intercept in the logistic regression model for that node}
-#'                \item{\code{beta1}}{ The regression coefficient in the logistic regression model for the parent}
+#'                \item{`label`}{ The label for each node/variate}
+#'                \item{`in_degree`}{ The number of edges pointing to the node}
+#'                \item{`id`}{ The ID of each node (simple integer)}
+#'                \item{`parent_id`}{ The ID of the parent node - if any. Otherwise equal to `-1`}
+#'                \item{`margprob`}{ The marginal probability of the node/variate}
+#'                \item{`beta0`}{ The intercept in the logistic regression model for that node}
+#'                \item{`beta1`}{ The regression coefficient in the logistic regression model for the parent}
 #'             }
 #'         }
 #'         \item{prob_drugs}{A vector with marginal probabilities of the drugs}
 #'         \item{prob_events}{A vector with marginal probabilities of the events}
 #'
 #'
-#' @seealso \code{\link{convert2Tables}},
-#'          \code{\link{generateDAG}}
+#' @seealso [convert2Tables()],
+#'          [generateDAG()]
 #' @export
 simulateSRS <- function(n_reports = 100,
                         n_drugs = 10,

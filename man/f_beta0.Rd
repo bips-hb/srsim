@@ -16,10 +16,10 @@ f_beta0(beta0, margprob, beta1, margprob_parent)
 \item{margprob_parent}{The marginal probability of the parent}
 }
 \value{
-The absolute difference between the desired marginal probability 
-        and the current marginal probability
+The absolute difference between the desired marginal probability
+and the current marginal probability
 }
 \description{
-\code{f_beta0} is used by \code{\link{simulateSRS}} to find the appropriate
+\code{f_beta0} is used by \code{\link[=simulateSRS]{simulateSRS()}} to find the appropriate
 intercept for a logistic regression model.
 }
