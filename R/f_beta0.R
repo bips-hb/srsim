@@ -1,6 +1,6 @@
 #' Determining the Intercept
 #' 
-#' \code{f_beta0} is used by \code{\link{simulateSRS}} to find the appropriate
+#' `f_beta0` is used by [simulateSRS()] to find the appropriate
 #' intercept for a logistic regression model. 
 #' 
 #' @param beta0 The intercept

@@ -1,6 +1,6 @@
 #' Directed Acyclic Graph for SR Data
 #'
-#' \code{generateDAG} creates a directed acyclic graph used for generating
+#' `generateDAG` creates a directed acyclic graph used for generating
 #' spontaneous reporting data
 #' 
 #' @param n_drugs Number of drugs (Default: 10)
@@ -8,9 +8,9 @@
 #' @param n_innocent_bystanders Number of innocent bystanders (Default: 5)
 #' @param n_correlated_pairs Number of drug-event pairs that will be associated (Default: 2)
 #'
-#' @return The DAG as an \code{igraph} object
+#' @return The DAG as an `igraph` object
 #' 
-#' @seealso \code{\link{simulateSRS}}
+#' @seealso [simulateSRS()]
 #' @export
 generateDAG <- function(n_drugs = 10,
                         n_events = 10,

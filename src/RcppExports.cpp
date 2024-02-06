@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // validReport
 bool validReport(Rcpp::LogicalMatrix report, int n_drugs, int n_events);
 RcppExport SEXP _SRSim_validReport(SEXP reportSEXP, SEXP n_drugsSEXP, SEXP n_eventsSEXP) {
