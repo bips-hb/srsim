@@ -25,13 +25,13 @@
 #'   \item{\code{d}}{Number of times the drug and event both did not appear in a report}
 #'
 #' @examples
-#' sr <- simulateSRS()
-#' tables <- create2x2Tables(sr)
+#' sr <- simulateSRS(verbose = FALSE)
+#' tables <- convert2Tables(sr)
 #'
 #' @seealso \code{\link{simulateSRS}}
 #' @export
 convert2Tables <- function(sr) {
-  return(dplyr::as_tibble(
+  tibble::as_tibble(
     create2x2TablesDAGRcpp(
       as.matrix(sr$sr),
       sr$prob_drugs,
@@ -40,5 +40,5 @@ convert2Tables <- function(sr) {
       as.integer(sr$nodes$parent_id),
       sr$nodes$beta1
     )
-  ))
+  )
 }

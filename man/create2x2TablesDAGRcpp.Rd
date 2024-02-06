@@ -4,8 +4,14 @@
 \alias{create2x2TablesDAGRcpp}
 \title{Create 2 x 2 Tables}
 \usage{
-create2x2TablesDAGRcpp(reports, prob_drugs, prob_events, n_parents, parent_id,
-  beta1)
+create2x2TablesDAGRcpp(
+  reports,
+  prob_drugs,
+  prob_events,
+  n_parents,
+  parent_id,
+  beta1
+)
 }
 \arguments{
 \item{reports}{A binary matrix. Each row is a report}

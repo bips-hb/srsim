@@ -34,8 +34,8 @@ as follows:
 }
 }
 \examples{
-sr <- simulateSRS()
-tables <- create2x2Tables(sr)
+sr <- simulateSRS(verbose = FALSE)
+tables <- convert2Tables(sr)
 
 }
 \seealso{
