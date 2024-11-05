@@ -4,8 +4,12 @@
 \alias{generateDAG}
 \title{Directed Acyclic Graph for SR Data}
 \usage{
-generateDAG(n_drugs = 10, n_events = 10, n_innocent_bystanders = 5,
-  n_correlated_pairs = 2)
+generateDAG(
+  n_drugs = 10,
+  n_events = 10,
+  n_innocent_bystanders = 5,
+  n_correlated_pairs = 2
+)
 }
 \arguments{
 \item{n_drugs}{Number of drugs (Default: 10)}
@@ -24,5 +28,5 @@ The DAG as an \code{igraph} object
 spontaneous reporting data
 }
 \seealso{
-\code{\link{simulateSRS}}
+\code{\link[=simulateSRS]{simulateSRS()}}
 }

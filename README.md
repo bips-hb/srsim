@@ -1,5 +1,9 @@
 # Simulating Spontaneous Reporting Systems (SRSim)
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/bips-hb/srsim/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bips-hb/srsim/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 Spontaneous reporting systems are used in the field of pharmacovigilance to detect (previously unknown) associations between drugs and adverse events (AEs). This `R` package allows for simulating large spontaneous reporting data sets. See https://srs.bips.eu/ for an example on how this simulator could be used.   
 
 ### Installation 

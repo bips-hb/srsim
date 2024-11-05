@@ -23,7 +23,7 @@ simulateReport(n_drugs, n_events, n_parents, beta0, beta1, parent_id)
 A binary vector
 }
 \description{
-Returns a single report for a spontaneous reporting system. 
-Note that this function does not check whether the report is 
+Returns a single report for a spontaneous reporting system.
+Note that this function does not check whether the report is
 'valid', see \code{\link{validReport}}
 }
