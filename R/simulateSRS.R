@@ -50,7 +50,7 @@
 #'                   named `drug1`, `drug2` ..., `event1`, `event2`, ...}
 #'         \item{dag}{The directed acycled graph as an `igraph` object}
 #'         \item{nodes}{A tibble with all the information on each node/variate:
-#'             \itemize{
+#'             \describe{
 #'                \item{`label`}{ The label for each node/variate}
 #'                \item{`in_degree`}{ The number of edges pointing to the node}
 #'                \item{`id`}{ The ID of each node (simple integer)}

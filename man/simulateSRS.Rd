@@ -60,7 +60,7 @@ are accepted. (Default: \code{TRUE})}
 named \code{drug1}, \code{drug2} ..., \code{event1}, \code{event2}, ...}
 \item{dag}{The directed acycled graph as an \code{igraph} object}
 \item{nodes}{A tibble with all the information on each node/variate:
-\itemize{
+\describe{
 \item{\code{label}}{ The label for each node/variate}
 \item{\code{in_degree}}{ The number of edges pointing to the node}
 \item{\code{id}}{ The ID of each node (simple integer)}
