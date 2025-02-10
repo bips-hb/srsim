@@ -33,8 +33,6 @@ DOI:10.1002/PDS.4970
 
 We gratefully acknowledge the financial support from the innovation fund (“Innovationsfonds”) of the Federal Joint Committee in Germany (grant number: 01VSF16020).
 
-### Contact
+### Author
 
-Louis Dijkstra\
-Leibniz Institute for Prevention Research & Epidemiology  
-E-mail: dijkstra (at) leibniz-bips.de
+Louis Dijkstra
